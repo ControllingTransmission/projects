@@ -38,6 +38,30 @@ function pickAny(array)
 
 var count = 0
 box.drawStyle = '1';
+box.shouldMoveX = true
+box.shouldMoveY = true
+box.shouldHide = false
+
+box.move = function()
+{
+	if (this.shouldMoveX)
+	{
+		if (Math.random() > .5)
+		{
+			this.left = Math.floor((screen.width -1) * Math.random())
+		}
+		this.width = 1 + Math.floor((screen.width - box.left) * Math.random())
+	}
+	
+	if (this.shouldMoveY)
+	{
+		if (Math.random() > .5)
+		{
+			this.top = Math.floor((screen.height -1) * Math.random())
+		}
+		this.height = 1 + Math.floor((screen.height - box.top) * Math.random())
+	}	
+}
 
 setInterval(function () {
 	count ++
@@ -45,23 +69,8 @@ setInterval(function () {
 
 	var colors = ["#fff", "#f00", "#0f0", "#ff0", "#00f", "#0ff", "#f0f"]
 
-	if (Math.random() > .33)
-	{
-		if (Math.random() > .5)
-		{
-			box.left = Math.floor(screen.width * Math.random())
-		}
-		box.width = Math.floor((screen.width - box.left) * Math.random())
-	}
-	else
-	{
-		if (Math.random() > .5)
-		{
-			box.top = Math.floor(screen.height * Math.random())
-		}
-		box.height = Math.floor((screen.height - box.top) * Math.random())
-	}
-
+	box.move()
+	
 	if (box.drawStyle == '1')
 	{
 		box.style.fg = pickAny(colors) //"#fff" //pickAny(colors)
@@ -74,7 +83,14 @@ setInterval(function () {
 		var i = Math.floor(Math.random()*1000) % colors.length
 		box.style.fg = "#000" //pickAny(colors)
 		box.style.bg = pickAny(colors)		
-		box.ch = pickAny(chars)
+		box.ch = " " //pickAny(chars)
+	}
+	
+	if (box.shouldHide)
+	{
+		box.style.fg = "#000" //pickAny(colors)
+		box.style.bg = "#000"	
+		box.ch = " "	
 	}
 
 	screen.render();
@@ -84,13 +100,31 @@ setInterval(function () {
 screen.key(['1', '2'], function(ch, key) 
 {
   	box.drawStyle = ch
-	box.content = " " + ch
+	//box.content = " " + ch
+});
+
+screen.key(['x'], function(ch, key) 
+{
+  	box.shouldMoveX = !box.shouldMoveX
+});
+
+
+screen.key(['y'], function(ch, key) 
+{
+  	box.shouldMoveY = !box.shouldMoveY
+});
+
+screen.key(['h'], function(ch, key) 
+{
+  	box.shouldHide = !box.shouldHide
 });
 
 
 
+
+
 // Quit on Escape, q, or Control-C.
-screen.key(['escape', 'q', 'C-c'], function(ch, key) 
+screen.key(['escape', 'C-c'], function(ch, key) 
 {
   return process.exit(0);
 });
