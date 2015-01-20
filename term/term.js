@@ -5,32 +5,45 @@ var screen = blessed.screen();
 
 // Create a box perfectly centered horizontally and vertically.
 var box = blessed.box({
-  top: 0,
-  left: 0,
-  height: '50%',
-  content: 'GREETINGS PROFESSOR {bold}FALKEN{/bold}!\nSHALL WE PLAY A SONG?',
+  top: 'top',
+  left: 'left',
+  height: '100%',
+  width: '100%',
+  content: '',
   tags: true,
   border: {
-    type: 'none',
-    color: '#111'
+    type: 'bg',
+    color: '#fff'
   },
   style: {
-    fg: 'white',
-    bg: '#111',
-    border: {
-      fg: '#f0f0f0'
-    },
-	ch: "x"
-  }
+    fg: '#fff',
+    bg: '#000',
+  },
+  ch: " "
 });
 
 // Append our box to the screen.
 screen.append(box);
 
+function pickAny(array)
+{
+	var i = Math.floor(Math.random() * array.length) % array.length
+	return array[i]
+}
+
+var count = 0
 setInterval(function () {
-	box.content = "Testing " + Math.random() + "\n" + "Screen is " + screen.width + "x" + screen.height	
+	count ++
+	//box.content = "Testing " + Math.random() + "\n" + "Screen is " + screen.width + "x" + screen.height	
+	var chars = ["/", "_", "\\", "|"]
+
+	box.ch = pickAny(chars)
+	var colors = ["#fff", "#f00", "#0f0", "#ff0", "#00f"]
+	var i = Math.floor(Math.random()*1000) % colors.length
+	box.style.fg = "#000" //pickAny(colors)
+	box.style.bg = pickAny(colors)
 	screen.render();
-}, 100)
+}, 300)
 
 
 // If box is focused, handle `enter`/`return` and give us some more content.
