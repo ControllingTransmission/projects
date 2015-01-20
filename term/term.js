@@ -12,7 +12,7 @@ var box = blessed.box({
   content: 'GREETINGS PROFESSOR {bold}FALKEN{/bold}!\nSHALL WE PLAY A SONG?',
   tags: true,
   border: {
-    type: 'line'
+    type: 'bg'
   },
   style: {
     fg: 'white',
@@ -29,11 +29,11 @@ var box = blessed.box({
 // Append our box to the screen.
 screen.append(box);
 
-// If our box is clicked, change the content.
-box.on('click', function(data) {
-  box.setContent('{center}Some different {red-fg}content{/red-fg}.{/center}');
-  screen.render();
-});
+setInterval(function () {
+	box.content = "Testing " + Math.random() + "\n" + "Screen is " + screen.width + "x" + screen.height	
+	screen.render();
+}, 100)
+
 
 // If box is focused, handle `enter`/`return` and give us some more content.
 box.key('enter', function(ch, key) {
@@ -49,7 +49,7 @@ screen.key(['escape', 'q', 'C-c'], function(ch, key) {
 });
 
 // Focus our element.
-box.focus();
+//box.focus();
 
 // Render the screen.
 screen.render();
