@@ -1,7 +1,11 @@
 var blessed = require('blessed');
 
+
 // Create a screen object.
 var screen = blessed.screen();
+screen.smartCSR = true
+screen.fastCSR = true
+screen.useBCE = true
 
 // Create a box perfectly centered horizontally and vertically.
 var box = blessed.box({
@@ -24,6 +28,7 @@ var box = blessed.box({
 
 // Append our box to the screen.
 screen.append(box);
+
 
 function pickAny(array)
 {
@@ -53,8 +58,16 @@ setInterval(function () {
 		box.top = Math.floor(screen.height * Math.random())
 		box.height = Math.floor((screen.height - box.top) * Math.random())
 	}
+	
+	if ((count / 10) % 2)
+	{
+		box.style.fg = pickAny(colors) //"#fff" //pickAny(colors)
+		box.style.bg ="#000"
+		box.ch = pickAny(["x", "o"])	
+	}
+
 	screen.render();
-}, 100)
+}, 1)
 
 
 // If box is focused, handle `enter`/`return` and give us some more content.
