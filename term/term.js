@@ -5,24 +5,22 @@ var screen = blessed.screen();
 
 // Create a box perfectly centered horizontally and vertically.
 var box = blessed.box({
-  top: 'center',
-  left: 'center',
-  width: '50%',
+  top: 0,
+  left: 0,
   height: '50%',
   content: 'GREETINGS PROFESSOR {bold}FALKEN{/bold}!\nSHALL WE PLAY A SONG?',
   tags: true,
   border: {
-    type: 'bg'
+    type: 'none',
+    color: '#111'
   },
   style: {
     fg: 'white',
-    bg: 'magenta',
+    bg: '#111',
     border: {
       fg: '#f0f0f0'
     },
-    hover: {
-      bg: 'green'
-    }
+	ch: "x"
   }
 });
 
