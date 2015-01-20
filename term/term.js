@@ -35,15 +35,26 @@ var count = 0
 setInterval(function () {
 	count ++
 	//box.content = "Testing " + Math.random() + "\n" + "Screen is " + screen.width + "x" + screen.height	
-	var chars = ["/", "_", "\\", "|"]
+	//var chars = ["/", "_", "\\", "|"]
+	var chars = [" ", ":", " ", ".", " ", " "]
 
 	box.ch = pickAny(chars)
 	var colors = ["#fff", "#f00", "#0f0", "#ff0", "#00f"]
 	var i = Math.floor(Math.random()*1000) % colors.length
 	box.style.fg = "#000" //pickAny(colors)
 	box.style.bg = pickAny(colors)
+	if (Math.random() > .2)
+	{
+		box.left = Math.floor(screen.width * Math.random())
+		box.width = Math.floor((screen.width - box.left) * Math.random())
+	}
+	else
+	{
+		box.top = Math.floor(screen.height * Math.random())
+		box.height = Math.floor((screen.height - box.top) * Math.random())
+	}
 	screen.render();
-}, 300)
+}, 100)
 
 
 // If box is focused, handle `enter`/`return` and give us some more content.
