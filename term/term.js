@@ -37,49 +37,61 @@ function pickAny(array)
 }
 
 var count = 0
+box.drawStyle = '1';
+
 setInterval(function () {
 	count ++
-	//box.content = "Testing " + Math.random() + "\n" + "Screen is " + screen.width + "x" + screen.height	
 	//var chars = ["/", "_", "\\", "|"]
-	var chars = [" ", ":", " ", ".", " ", " "]
 
-	box.ch = pickAny(chars)
-	var colors = ["#fff", "#f00", "#0f0", "#ff0", "#00f"]
-	var i = Math.floor(Math.random()*1000) % colors.length
-	box.style.fg = "#000" //pickAny(colors)
-	box.style.bg = pickAny(colors)
-	if (Math.random() > .2)
+	var colors = ["#fff", "#f00", "#0f0", "#ff0", "#00f", "#0ff", "#f0f"]
+
+	if (Math.random() > .33)
 	{
-		box.left = Math.floor(screen.width * Math.random())
+		if (Math.random() > .5)
+		{
+			box.left = Math.floor(screen.width * Math.random())
+		}
 		box.width = Math.floor((screen.width - box.left) * Math.random())
 	}
 	else
 	{
-		box.top = Math.floor(screen.height * Math.random())
+		if (Math.random() > .5)
+		{
+			box.top = Math.floor(screen.height * Math.random())
+		}
 		box.height = Math.floor((screen.height - box.top) * Math.random())
 	}
-	
-	if ((count / 10) % 2)
+
+	if (box.drawStyle == '1')
 	{
 		box.style.fg = pickAny(colors) //"#fff" //pickAny(colors)
 		box.style.bg ="#000"
-		box.ch = pickAny(["x", "o"])	
+		box.ch = pickAny(["x", "o", "|", "-"])	
+	}
+	else
+	{
+		var chars = [" ", ":", " ", ".", " ", " "]
+		var i = Math.floor(Math.random()*1000) % colors.length
+		box.style.fg = "#000" //pickAny(colors)
+		box.style.bg = pickAny(colors)		
+		box.ch = pickAny(chars)
 	}
 
 	screen.render();
 }, 1)
 
 
-// If box is focused, handle `enter`/`return` and give us some more content.
-box.key('enter', function(ch, key) {
-  box.setContent('{right}Even different {black-fg}content{/black-fg}.{/right}\n');
-  box.setLine(1, 'bar');
-  box.insertLine(1, 'foo');
-  screen.render();
+screen.key(['1', '2'], function(ch, key) 
+{
+  	box.drawStyle = ch
+	box.content = " " + ch
 });
 
+
+
 // Quit on Escape, q, or Control-C.
-screen.key(['escape', 'q', 'C-c'], function(ch, key) {
+screen.key(['escape', 'q', 'C-c'], function(ch, key) 
+{
   return process.exit(0);
 });
 
