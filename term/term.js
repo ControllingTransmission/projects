@@ -105,9 +105,12 @@ var Thing = {
 	
 	randColor: function()
 	{
-		var colors = ["#fff", "#f00", "#0f0", "#ff0", "#00f", "#0ff", "#f0f"]
-		var color = colors[this._count % colors.length] 
-		return color
+		return pickAny(["#fff", "#f00", "#0f0", "#ff0", "#00f", "#0ff", "#f0f"])
+	},
+	
+	randChar: function()
+	{
+		return pickAny(["O", "+", "|", "-"])
 	},
 	
 	randX: function()
@@ -123,10 +126,6 @@ var Thing = {
 	
 	render: function()
 	{
-		this._count ++
-		program.setx(0) //Math.floor(Math.random()*screen.width))
-		program.sety(this._count % screen.height)
-		program.write(this.blockString(), this.randColor() + ' bg')
 	},
 	
 	start: function()
@@ -178,17 +177,28 @@ hLine.attachToKey("h")
 
 var vLine = Thing.clone()
 
+vLine.init = function()
+{
+	this._x = 0
+}
+
 vLine.render = function()
 {
-	this._ttl = screen.width - 1
+	var aChar = "  "
 	var color = this.randColor() + ' bg'
-	var step = Math.ceil(screen.height/screen.width)
-	var x = this._count % screen.width
-	for (var y = 0; y < screen.height; y += step)
+	this._x += aChar.length
+	
+	if (this._x > screen.width -1)
+	{	
+		this.stop()
+		return
+	}
+	
+	for (var y = 0; y < screen.height; y += Math.floor((screen.height -1)/4))
 	{
-		program.setx(x)
+		program.setx(this._x)
 		program.sety(y)
-		program.write(" ", color)
+		program.write(aChar, color)
 	}
 }
 
@@ -209,7 +219,62 @@ tDot.render = function()
 
 tDot._ttl = 15
 
-tDot.attachToKey("f")
+tDot.attachToKey("d")
+
+// --- textBlob ------------------------------
+
+var textBlob = Thing.clone()
+
+textBlob.init = function()
+{
+	this._box = blessed.box(
+		{
+			top:10,
+			left:10,
+			width:10,
+			height:10,
+			content: '',
+			tags: false,
+			style: 
+			{
+				fg: "#fff"
+			},
+			ch: 'x'
+		}
+	);
+	
+	this._box.ch = this.randChar()
+
+	screen.append(this._box)
+}
+
+textBlob.randPos = function()
+{
+	this._box.top = Math.floor(Math.random()*(screen.width  - 2))
+	this._box.left = Math.floor(Math.random()*(screen.height - 2))
+	this._box.width = Math.floor(Math.random()*(screen.width  - this._box.left))
+	this._box.height = Math.floor(Math.random()*(screen.height - this._box.top))
+	this._box.style.fg = this.randColor()
+	//this._box.ch = this.randChar()
+		
+}
+
+textBlob.render = function()
+{
+	//Thing.step.apply(this)
+	this.randPos()
+}
+
+textBlob.stop = function()
+{
+	Thing.stop.apply(this)
+	screen.remove(this._box)
+	this._box = null
+}
+
+textBlob._ttl = 20
+
+textBlob.attachToKey("t")
 
 
 // ----------------------------------------------
@@ -238,9 +303,11 @@ screen.step = function()
 	program.sety(0)
 
 	this._age ++
+	
+	screen.render()
 }
 
-setInterval(function () { screen.step() } , 10)
+setInterval(function () { screen.step() } , 30)
 
 screen.key(['escape', 'C-c'], function(ch, key) 
 {
