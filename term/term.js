@@ -1,34 +1,56 @@
-var blessed = require('blessed');
+var blessed = require('blessed')
+var program = blessed.program()
 
-
-// Create a screen object.
 var screen = blessed.screen();
 screen.smartCSR = true
 screen.fastCSR = true
 screen.useBCE = true
+screen.autoPadding = false
 
-// Create a box perfectly centered horizontally and vertically.
-var box = blessed.box({
-  top: 'top',
-  left: 'left',
-  height: '100%',
-  width: '100%',
-  content: 'keys are 1, 2, x, y, f and h. Press r to begin.',
-  tags: true,
-  border: {
-    type: 'bg',
-    color: '#fff'
-  },
-  style: {
-    fg: '#fff',
-    bg: '#000',
-  },
-  ch: " "
-});
+// ------------------------------------------
 
-// Append our box to the screen.
-screen.append(box);
+String.prototype.repeat = function( num )
+{
+    return new Array( num + 1 ).join( this );
+}
 
+Array.prototype.removeAt = function(i)
+{
+	var v = this[i]
+	this.splice(i, 1);
+	return v;
+}
+	
+Array.prototype.indexOf = function(elt /*, from*/)
+{
+	var len = this.length;
+
+	var from = Number(arguments[1]) || 0;
+	from = (from < 0)
+		? Math.ceil(from)
+		: Math.floor(from);
+	if (from < 0)
+		from += len;
+
+	for (; from < len; from++)
+	{
+		if (from in this &&
+			this[from] === elt)
+		return from;
+	}
+	return -1;
+}
+	
+
+Array.prototype.remove = function(e)
+{
+	var i = this.indexOf(e);
+	if(i > -1)
+	{
+		this.removeAt(i);
+	}
+	return this;
+}
 
 function pickAny(array)
 {
@@ -36,135 +58,192 @@ function pickAny(array)
 	return array[i]
 }
 
-var count = 0
-box.drawStyle = '1';
-box.shouldMoveX = true
-box.shouldMoveY = true
-box.shouldHide = false
-box.shouldullScreen = false
+// ----------------------------------------------
 
-box.fullScreen = function()
-{
-	this.left = 0
-	this.top = 0
-	this.width = screen.width
-	this.height = screen.height
+var things = []
+
+var Thing = {
+	clone: function()
+	{
+		var obj = {}
+		for (var k in this)
+		{
+			if (this.hasOwnProperty(k))
+			{
+				obj[k] = this[k]
+			}
+		}
+		obj.init()
+		return obj
+	},
+	
+	init: function()
+	{
+	},
+	
+	_count: 0,
+	_ttl: 0,
+	
+	step: function()
+	{
+		this._count ++
+		
+		if (this._ttl != 0 && this._count > this._ttl)
+		{
+			this.stop()
+		}
+	},
+	
+	blockString: function()
+	{
+		if (this._blockString == null || this._blockString.length != screen.width)
+		{
+			this._blockString = " ".repeat(screen.width)	
+		}	
+		return this._blockString
+	},
+	
+	randColor: function()
+	{
+		var colors = ["#fff", "#f00", "#0f0", "#ff0", "#00f", "#0ff", "#f0f"]
+		var color = colors[this._count % colors.length] 
+		return color
+	},
+	
+	randX: function()
+	{
+		return Math.floor(Math.random()*screen.width)	
+	},
+	
+	randY: function()
+	{
+		return Math.floor(Math.random()*screen.height)	
+	},
+	
+	
+	render: function()
+	{
+		this._count ++
+		program.setx(0) //Math.floor(Math.random()*screen.width))
+		program.sety(this._count % screen.height)
+		program.write(this.blockString(), this.randColor() + ' bg')
+	},
+	
+	start: function()
+	{
+		things.push(this)
+		return this
+	},
+	
+	stop: function()
+	{
+		things.remove(this)
+		return this
+	},
+	
+	attachToKey: function(k)
+	{
+		var self = this
+		screen.key([k], function(ch, key) 
+		{
+		  	self.clone().start()
+		});	
+	}
 }
 
-box.move = function()
+// --- hLine -----------------------
+
+var hLine = Thing.clone()
+
+hLine.render = function()
 {
-	if (this.shouldMoveX)
-	{
-		if (Math.random() > .5)
-		{
-			this.left = Math.floor((screen.width -1) * Math.random())
-		}
-		this.width = 1 + Math.floor((screen.width - box.left) * Math.random())
-	}
-	
-	if (this.shouldMoveY)
-	{
-		if (Math.random() > .5)
-		{
-			this.top = Math.floor((screen.height -1) * Math.random())
-		}
-		this.height = 1 + Math.floor((screen.height - box.top) * Math.random())
-	}	
-}
-
-step = function()
-{
-	count ++
-	//var chars = ["/", "_", "\\", "|"]
-
-	var colors = ["#fff", "#f00", "#0f0", "#ff0", "#00f", "#0ff", "#f0f"]
-
-	box.move()
-	
-	if (box.drawStyle == '1')
-	{
-		box.style.fg = pickAny(colors) //"#fff" //pickAny(colors)
-		box.style.bg ="#000"
-		box.ch = pickAny(["x", "o", "|", "-"])	
-	}
-	else
-	{
-		var chars = [" ", ":", " ", ".", " ", " "]
-		var i = Math.floor(Math.random()*1000) % colors.length
-		box.style.fg = "#000" //pickAny(colors)
-		box.style.bg = pickAny(colors)		
-		box.ch = " " //pickAny(chars)
-	}
-	
-	if (box.shouldHide)
-	{
-		box.style.fg = "#000" //pickAny(colors)
-		box.style.bg = "#000"	
-		box.ch = " "	
-	}
-	
-	if (box.shouldullScreen)
-	{
-		box.fullScreen()
-	}
-	
+	this._ttl = screen.height -1
+	program.setx(0)
+	program.sety(this._count % screen.height)
+	program.write(this.blockString(), this.randColor() + ' bg')
 	/*
-	box.content = box.content + "" + Math.floor(Math.random()*10)
-	if (box.content.length > 5000)
+	var color = this.randColor() + ' bg'
+	for (var x = 0; x < screen.width; x ++)
 	{
-		box.content = ""	
-	}
+		program.setx(x)
+		program.sety(this._count % screen.height)
+		program.write(" ", color)
+	}	
 	*/
-	screen.render();
 }
 
+hLine.attachToKey("h")
 
-screen.key(['1', '2'], function(ch, key) 
+// --- vLine -----------------------
+
+var vLine = Thing.clone()
+
+vLine.render = function()
 {
-  	box.drawStyle = ch
-});
+	this._ttl = screen.width - 1
+	var color = this.randColor() + ' bg'
+	var step = Math.ceil(screen.height/screen.width)
+	var x = this._count % screen.width
+	for (var y = 0; y < screen.height; y += step)
+	{
+		program.setx(x)
+		program.sety(y)
+		program.write(" ", color)
+	}
+}
 
-screen.key(['x'], function(ch, key) 
+vLine.attachToKey("v")
+
+// --- tDot ------------------------------
+
+var tDot = Thing.clone()
+
+tDot.render = function()
 {
-  	box.shouldMoveX = !box.shouldMoveX
-});
+	//this._ttl = 15
+	program.setx(this.randX())
+	program.sety(this.randY())
+	program.write(" ", this.randColor() + ' bg')
+}	
 
-screen.key(['y'], function(ch, key) 
+
+tDot._ttl = 15
+
+tDot.attachToKey("f")
+
+
+// ----------------------------------------------
+
+screen._age = 0
+
+screen.step = function()
 {
-  	box.shouldMoveY = !box.shouldMoveY
-});
+	//program.alternateBuffer();
+	program.hideCursor()
+	program.clear()
 
-screen.key(['h'], function(ch, key) 
-{
-  	box.shouldHide = !box.shouldHide
-});
+	for (var i = 0; i < things.length; i ++)
+	{
+		var thing = things[i]
+		thing.render()
+	}
+		
+	for (var i = 0; i < things.length; i ++)
+	{
+		var thing = things[i]
+		thing.step()
+	}
+	
+	program.setx(0)
+	program.sety(0)
 
-screen.key(['f'], function(ch, key) 
-{
-  	box.shouldullScreen = !box.shouldullScreen
-});
+	this._age ++
+}
 
-isRunning = false
+setInterval(function () { screen.step() } , 10)
 
-screen.key(['r'], function(ch, key) 
-{
-	isRunning = true
-	box.content = ""
-	setInterval(function () { step() } , 1)
-})
-
-
-
-
-
-// Quit on Escape, q, or Control-C.
 screen.key(['escape', 'C-c'], function(ch, key) 
 {
   return process.exit(0);
 });
 
-// Focus our element.
-//box.focus();
-
-// Render the screen.
-screen.render();
