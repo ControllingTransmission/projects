@@ -1,5 +1,9 @@
 
 // --- setup blessed ---------------------------------------
+//var AudioContext = require('web-audio-api').AudioContext
+//var AudioContextMonkeyPatch = require('audioinput/AudioContextMonkeyPatch');
+//var Spectrum = require('./audioinput/Spectrum');
+
 
 var blessed = require('blessed')
 var program = blessed.program()
