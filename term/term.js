@@ -277,27 +277,35 @@ var vLine = Thing.clone()
 
 vLine.init = function()
 {
-	this._x = 0
+	this._y = 1 + Math.floor((screen.height -2)*Math.random())
+	
+	this._dir = Math.random() > .5 ? 1 : -1
+	
+	if (this._dir == -1)
+	{
+		this._x = screen.width
+	}
+	else
+	{
+		this._x = 0
+	}
 }
 
 vLine.render = function()
 {
 	var aChar = "  "
 	var color = this.randColor() + ' bg'
-	this._x += aChar.length
+	this._x += this._dir * aChar.length
 	
-	if (this._x > screen.width -1)
+	if (this._x > screen.width -1 || this._x < 0)
 	{	
 		this.stop()
 		return
 	}
 	
-	for (var y = 0; y < screen.height; y += Math.floor((screen.height -1)/4))
-	{
-		program.setx(this._x)
-		program.sety(y)
-		program.write(aChar, color)
-	}
+	program.setx(this._x)
+	program.sety(this._y)
+	program.write(aChar, color)
 }
 
 vLine.attachToKey("v")
