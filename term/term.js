@@ -109,14 +109,14 @@ var Thing = {
 		);
 	},
 	
-	_count: 0,
+	_age: 0,
 	_ttl: 0,
 	
 	step: function()
 	{
-		this._count ++
+		this._age ++
 		
-		if (this._ttl != 0 && this._count > this._ttl)
+		if (this._ttl != 0 && this._age > this._ttl)
 		{
 			this.stop()
 		}
@@ -254,7 +254,7 @@ HLine.render = function()
 {
 	this._ttl = screen.height - 1
 	program.setx(0)
-	program.sety(this._count % screen.height)
+	program.sety(this._age % screen.height)
 	program.write(this.blockString(), this._color)
 }
 
@@ -274,30 +274,80 @@ RedHLine.attachToKey("j")
 // --- vLine -----------------------
 
 var vLine = Thing.clone()
-
-vLine.init = function()
+vLine._movesX = true
+vLine._changesColor = true
+vLine._changesDir = false
+vLine.start = function()
 {
-	this._y = 1 + Math.floor((screen.height -2)*Math.random())
+	Thing.start.apply(this)
 	
-	this._dir = Math.random() > .5 ? 1 : -1
-	
-	if (this._dir == -1)
+	this._color = this.randColor() + ' bg'
+
+	if (this._movesX)
 	{
-		this._x = screen.width
+		this._y = 1 + Math.floor((screen.height -2)*Math.random())
+		this._xdir = Math.random() > .5 ? 1 : -1
+		this._ydir = 0
+	
+		if (this._xdir == -1)
+		{
+			this._x = screen.width
+		}
+		else
+		{
+			this._x = 0
+		}
 	}
 	else
 	{
-		this._x = 0
+		this._x = 1 + Math.floor((screen.width -2)*Math.random())
+		this._ydir = Math.random() > .5 ? 1 : -1
+		this._xdir = 0
+	
+		if (this._ydir == -1)
+		{
+			this._y = screen.height
+		}
+		else
+		{
+			this._y = 0
+		}
+	}	
+}
+
+vLine.changeDir = function()
+{
+	if (this._xdir != 0)
+	{
+		this._xdir = 0
+		this._ydir = Math.random() > .5 ? 1 : -1
 	}
+	else
+	{
+		this._ydir = 0
+		this._xdir = Math.random() > .5 ? 1 : -1
+	}	
 }
 
 vLine.render = function()
 {
 	var aChar = "  "
-	var color = this.randColor() + ' bg'
-	this._x += this._dir * aChar.length
 	
-	if (this._x > screen.width -1 || this._x < 0)
+	if (this._changesDir && Math.random() < .05)
+	{
+		this.changeDir()
+	}
+	
+	if (this._changesColor)
+	{
+		this._color = this.randColor() + ' bg'
+	}
+	
+	this._x += this._xdir * aChar.length
+	this._y += this._ydir 
+	
+	if (this._x > screen.width  -1 || this._x < 0 ||
+		this._y > screen.height -1 || this._y < 0 )
 	{	
 		this.stop()
 		return
@@ -305,10 +355,40 @@ vLine.render = function()
 	
 	program.setx(this._x)
 	program.sety(this._y)
-	program.write(aChar, color)
+	program.write(aChar, this._color)
 }
 
 vLine.attachToKey("v")
+
+{
+	var line = vLine.clone()
+	line._changesColor = false
+	line._movesX = false
+	line.attachToKey("b")
+}
+
+{
+	var line = vLine.clone()
+	line._changesColor = false
+	line.attachToKey("n")
+}
+
+{
+	var line = vLine.clone()
+	line._changesColor = true
+	line._changesDir = true
+	line.attachToKey("m")
+}
+
+{
+	var line = vLine.clone()
+	line._movesX = false
+	line._changesColor = true
+	line._changesDir = true
+	line.attachToKey(",")
+}
+
+
 
 // --- tDot ------------------------------
 
@@ -363,7 +443,18 @@ Blob.randBoxY = function()
 
 Blob.randBoxHeight = function()
 {
-	//this._box.height = Math.floor(Math.random()*(screen.height - this._box.top))
+	this._box.height = Math.floor(Math.random()*(screen.height - this._box.top))
+}
+
+Blob.randBox = function()
+{
+	this.randBoxX()
+	this.randBoxWidth()
+	
+	this.randBoxY()
+	this.randBoxHeight()
+	
+	this.randBoxBgColor()
 }
 
 Blob.render = function()
@@ -426,52 +517,106 @@ screen.key(["w"], function(ch, key)
 });
 
 
-// --- BigFlash ----------------------------------------
+// --- Flash ----------------------------------------
 
-var BigFlash = Boxed.clone()
+var Flash = Boxed.clone()
 
-BigFlash.start = function()
+Flash.start = function()
 {
 	Boxed.start.apply(this)
 	this._box.ch = ' '
-	this._box.top = 0
 	this._box.left = 0
+	this._box.top = 0
 	this._box.width = screen.width
 	this._box.height = screen.height
 	this._box.style.bg = "#fff"
+	//this.middle()
 }
 
-BigFlash.render = function()
+Flash.middle = function()
+{
+	var h = 10
+	var w = h*3
+	this._box.left = Math.floor((screen.width - w)/2)
+	this._box.top = Math.floor((screen.height - h)/2)
+	this._box.width = w
+	this._box.height = h	
+	//console.log("this._box.top = " + this._box.top)
+}
+
+Flash.render = function()
 {
 }
 
-BigFlash._ttl = 10
-BigFlash.attachToKey("u")
+Flash._ttl = 1
+Flash.attachToKey("u")
 
-RedFlash = BigFlash.clone()
+// ---
+
+RedFlash = Flash.clone()
 RedFlash.start = function()
 {
-	BigFlash.start.apply(this)
+	Flash.start.apply(this)
 	this._box.style.bg = "#f00"
 }
 RedFlash.attachToKey("i")
 
+// ---
 
-GreenFlash = BigFlash.clone()
+GreenFlash = Flash.clone()
 GreenFlash.start = function()
 {
-	BigFlash.start.apply(this)
+	Flash.start.apply(this)
 	this._box.style.bg = "#0f0"
 }
 GreenFlash.attachToKey("o")
 
-BlueFlash = BigFlash.clone()
+// ---
+
+BlueFlash = Flash.clone()
 BlueFlash.start = function()
 {
-	BigFlash.start.apply(this)
+	Flash.start.apply(this)
 	this._box.style.bg = "#00f"
 }
 BlueFlash.attachToKey("p")
+
+// ---
+
+Blinker = Blob.clone()
+Blinker.start = function()
+{
+	Flash.start.apply(this)
+	this.randBox()
+	this._ttl = 1
+}
+Blinker.render = function()
+{
+	//var color = this._age % 5 ? "#fff" : "#000"
+	//this._box.style.bg = color
+}
+Blinker.attachToKey("[")
+
+// ---
+
+{
+	var TextBlinker = Blob.clone()
+	TextBlinker.start = function()
+	{
+		Flash.start.apply(this)
+		this.randBox()
+		this._box.style.bg = "#000"
+		this._box.style.fg = this.randColor()
+		this._box.ch = this.randChar()
+		this._ttl = 1
+	}
+	TextBlinker.render = function()
+	{
+		//var color = this._age % 5 ? "#fff" : "#000"
+		//this._box.style.bg = color
+	}
+	TextBlinker.attachToKey("]")
+}
 
 
 // --- screen render loop -------------------------------------------
