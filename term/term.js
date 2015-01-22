@@ -395,13 +395,13 @@ tDot.render = function()
 	program.write(this._char, this.randColor() + ' bg')
 }	
 tDot._ttl = 15
-tDot.attachToKey("d")
+tDot.attachToKey("z")
 
 {
 	var dot = tDot.clone()
 	dot._char = "  "
 	dot._ttl = 0
-	dot.toggleAttachToKey("f")
+	dot.toggleAttachToKey("x")
 }
 
 // --- TextBlob ------------------------------
@@ -493,10 +493,14 @@ Blob.render = function()
 
 
 Blob._ttl = 0
-Blob.toggleAttachToKey("q")
 Blob._kind = "random"
 Blob._isSolid = false
+Blob.toggleAttachToKey("q")
 
+screen.key(["w"], function(ch, key) 
+{
+  	Blob._isSolid = !Blob._isSolid
+});
 
 screen.key(["e"], function(ch, key) 
 {
@@ -513,9 +517,29 @@ screen.key(["t"], function(ch, key)
   	Blob._kind = "random"
 });
 
-screen.key(["w"], function(ch, key) 
+// ----
+
+Blob2 = Blob.clone()
+Blob2.toggleAttachToKey("a")
+
+screen.key(["s"], function(ch, key) 
 {
-  	Blob._isSolid = !Blob._isSolid
+  	Blob2._isSolid = !Blob2._isSolid
+});
+
+screen.key(["d"], function(ch, key) 
+{
+  	Blob2._kind = "vertical"
+});	
+
+screen.key(["f"], function(ch, key) 
+{
+  	Blob2._kind = "horizontal"
+});
+
+screen.key(["g"], function(ch, key) 
+{
+  	Blob2._kind = "random"
 });
 
 
@@ -621,6 +645,8 @@ Blinker.attachToKey("[")
 }
 
 
+/*
+
 {
 	var b = TextBlinker.clone()
 	b.start = function()
@@ -638,6 +664,7 @@ Blinker.attachToKey("[")
 
 	b.toggleAttachToKey("a")
 }
+*/
 
 
 // --- screen render loop -------------------------------------------

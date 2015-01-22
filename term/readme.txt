@@ -5,6 +5,7 @@ install node package from:
 then run:
 
     npm install blessed
+    npm install web-audio-api
 
 then to run the app:
 
