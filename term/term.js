@@ -258,23 +258,27 @@ HLine.render = function()
 	program.write(this.blockString(), this._color)
 }
 
-BlueHLine = HLine.clone()
-BlueHLine._color = '#00f bg'
-BlueHLine.attachToKey("h")
+{
+	var line = HLine.clone()
+	line._color = '#f00 bg'
+	line.attachToKey("h")
+}
 
-GreenHLine = HLine.clone()
-GreenHLine._color = '#0f0 bg'
-GreenHLine.attachToKey("g")
+{
+	line = HLine.clone()
+	line._color = '#0f0 bg'
+	line.attachToKey("j")
+}
 
-
-RedHLine = HLine.clone()
-RedHLine._color = '#f00 bg'
-RedHLine.attachToKey("j")
+{
+	line = HLine.clone()
+	line._color = '#00f bg'
+	line.attachToKey("k")
+}
 
 // --- vLine -----------------------
 
 var vLine = Thing.clone()
-vLine._movesX = true
 vLine._changesColor = true
 vLine._changesDir = false
 vLine.start = function()
@@ -283,7 +287,7 @@ vLine.start = function()
 	
 	this._color = this.randColor() + ' bg'
 
-	if (this._movesX)
+	if (Math.random() < .5)
 	{
 		this._y = 1 + Math.floor((screen.height -2)*Math.random())
 		this._xdir = Math.random() > .5 ? 1 : -1
@@ -358,18 +362,11 @@ vLine.render = function()
 	program.write(aChar, this._color)
 }
 
-vLine.attachToKey("v")
 
 {
 	var line = vLine.clone()
 	line._changesColor = false
-	line._movesX = false
-	line.attachToKey("b")
-}
-
-{
-	var line = vLine.clone()
-	line._changesColor = false
+	line._changesDir = false
 	line.attachToKey("n")
 }
 
@@ -380,27 +377,28 @@ vLine.attachToKey("v")
 	line.attachToKey("m")
 }
 
-{
-	var line = vLine.clone()
-	line._movesX = false
-	line._changesColor = true
-	line._changesDir = true
-	line.attachToKey(",")
-}
 
 
 
 // --- tDot ------------------------------
 
 var tDot = Thing.clone()
+tDot._char = "          "  
 tDot.render = function()
 {
 	program.setx(this.randX())
 	program.sety(this.randY())
-	program.write(" ", this.randColor() + ' bg')
+	program.write(this._char, this.randColor() + ' bg')
 }	
 tDot._ttl = 15
 tDot.attachToKey("d")
+
+{
+	var dot = tDot.clone()
+	dot._char = "  "
+	dot._ttl = 0
+	dot.toggleAttachToKey("f")
+}
 
 // --- TextBlob ------------------------------
 
@@ -549,37 +547,37 @@ Flash.render = function()
 }
 
 Flash._ttl = 1
-Flash.attachToKey("u")
 
-// ---
-
-RedFlash = Flash.clone()
-RedFlash.start = function()
 {
-	Flash.start.apply(this)
-	this._box.style.bg = "#f00"
+	var flash = Flash.clone()
+	flash.start = function()
+	{
+		Flash.start.apply(this)
+		this._box.style.bg = "#f00"
+	}
+	flash.attachToKey("u")
 }
-RedFlash.attachToKey("i")
 
-// ---
-
-GreenFlash = Flash.clone()
-GreenFlash.start = function()
 {
-	Flash.start.apply(this)
-	this._box.style.bg = "#0f0"
+	var flash = Flash.clone()
+	flash.start = function()
+	{
+		Flash.start.apply(this)
+		this._box.style.bg = "#0f0"
+	}
+	flash.attachToKey("i")
 }
-GreenFlash.attachToKey("o")
 
-// ---
-
-BlueFlash = Flash.clone()
-BlueFlash.start = function()
 {
-	Flash.start.apply(this)
-	this._box.style.bg = "#00f"
+	var flash = Flash.clone()
+	flash.start = function()
+	{
+		Flash.start.apply(this)
+		this._box.style.bg = "#00f"
+	}
+	flash.attachToKey("o")
 }
-BlueFlash.attachToKey("p")
+
 
 // ---
 
@@ -619,6 +617,25 @@ Blinker.attachToKey("[")
 }
 
 
+{
+	var b = TextBlinker.clone()
+	b.start = function()
+	{
+		TextBlinker.start.apply(this)
+		this._ttl = 1000000
+	}
+	b.render = function()
+	{
+	}
+	b.stop = function()
+	{
+		kjdkjd
+	}
+
+	b.toggleAttachToKey("a")
+}
+
+
 // --- screen render loop -------------------------------------------
 
 screen._age = 0
@@ -647,6 +664,8 @@ screen.step = function()
 		
 	screen.render()
 }
+
+// --- setting the speed with number keys ---
 
 intervalObj = setInterval( function () { screen.step() } , 50)
 
@@ -679,8 +698,6 @@ screen.key(['5'], function(ch, key)
 	clearInterval(intervalObj)
 	intervalObj = setInterval( function () { screen.step() } , 23)
 });
-
-
 
 // --- escape key -------------------------------------------
 
