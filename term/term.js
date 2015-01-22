@@ -648,7 +648,39 @@ screen.step = function()
 	screen.render()
 }
 
-setInterval(function () { screen.step() } , 40)
+intervalObj = setInterval( function () { screen.step() } , 50)
+
+screen.key(['1'], function(ch, key) 
+{
+	clearInterval(intervalObj)
+	intervalObj = setInterval( function () { screen.step() } , 500)
+});
+
+screen.key(['2'], function(ch, key) 
+{
+	clearInterval(intervalObj)
+	intervalObj = setInterval( function () { screen.step() } , 250)
+});
+
+screen.key(['3'], function(ch, key) 
+{
+	clearInterval(intervalObj)
+	intervalObj = setInterval( function () { screen.step() } , 120)
+});
+
+screen.key(['4'], function(ch, key) 
+{
+	clearInterval(intervalObj)
+	intervalObj = setInterval( function () { screen.step() } , 50)
+});
+
+screen.key(['5'], function(ch, key) 
+{
+	clearInterval(intervalObj)
+	intervalObj = setInterval( function () { screen.step() } , 23)
+});
+
+
 
 // --- escape key -------------------------------------------
 
