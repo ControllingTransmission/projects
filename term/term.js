@@ -451,7 +451,9 @@ Blob.randBoxX = function()
 
 Blob.randBoxWidth = function()
 {
-	this._box.width = Math.floor(Math.random()*(screen.width  - this._box.left))
+	do {
+		this._box.width = Math.floor(Math.random()*(screen.width  - this._box.left))
+	} while (this._box.width * this._box.height > screen.width * screen.height *.25)
 }
 
 Blob.randBoxY = function()
@@ -463,7 +465,9 @@ Blob.randBoxY = function()
 
 Blob.randBoxHeight = function()
 {
-	this._box.height = Math.floor(Math.random()*(screen.height - this._box.top))
+	do {
+		this._box.height = Math.floor(Math.random()*(screen.height - this._box.top))
+	} while (this._box.width * this._box.height > screen.width * screen.height *.25)
 }
 
 Blob.randBox = function()
@@ -686,27 +690,107 @@ Blinker.attachToKey("[")
 	TextBlinker.attachToKey("]")
 }
 
+// ------------------
 
-/*
-
+function componentToHex(c) 
 {
-	var b = TextBlinker.clone()
-	b.start = function()
-	{
-		TextBlinker.start.apply(this)
-		this._ttl = 1000000
-	}
-	b.render = function()
-	{
-	}
-	b.stop = function()
-	{
-		kjdkjd
-	}
-
-	b.toggleAttachToKey("a")
+    var hex = c.toString(16);
+	return hex.charAt(0)
+    //return hex.length == 1 ? "0" + hex : hex;
 }
-*/
+
+function rgbToHex(r, g, b) 
+{
+    return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+}
+
+Photo = Thing.clone()
+Photo._ttl = 0
+Photo._x = 0
+Photo._y = 0
+Photo.width = function()
+{
+	return this._pixels.shape[0]
+}
+
+Photo.height = function()
+{
+	return this._pixels.shape[1]
+}
+
+Photo.center = function()
+{
+	this._x = (screen.width - this.width())/2
+	this._y = (screen.height - this.height())/2
+}
+
+Photo.render = function()
+{
+	var pixels = this.pixels()
+	if (pixels == null) 
+	{
+		//console.log("skipping '" + this._name + "'")
+		return
+	}
+	//console.log("drawing '" + this._name + "'")
+
+	this.center()
+	var w = this.width()
+	var h = this.height()
+	
+	for (var x = 0; x < w && x + this._x < screen.width; x ++)
+	{
+		for (var y = 0; y < h && y + this._y < screen.height; y ++)
+		{
+			var r = pixels.get(x, y, 0)
+			var g = pixels.get(x, y, 1)
+			var b = pixels.get(x, y, 2)
+			if (r+g+b < 256*3*.8)
+			{
+				program.setx(x + this._x)
+				program.sety(y + this._y)
+				//var color = rgbToHex(r, g, b) + " bg"
+				//console.log(color)
+				program.write('x', "#fff fg")
+			}
+		}
+	}
+}
+
+Photo._name = "a.png"
+Photo._pixels = null
+Photo._isLoading = false
+
+Photo.pixels = function()
+{
+	if (this._pixels == null && this._isLoading == false)
+	{
+		console.log("loading '" + this._name + "'")
+
+		this._isLoading = true
+		
+		var getPixels = require("get-pixels")
+		
+		var self = this
+		getPixels(this._name, function(err, pixels) 
+		{
+			if(err) 
+			{
+				console.log("Bad image path")
+				return
+			}
+			//console.log("got pixels", pixels.get(0,0,1))
+			self._pixels = pixels
+		})
+	}
+	
+	return this._pixels
+}
+
+//program.clear()
+Photo.pixels()
+Photo.toggleAttachToKey("v")
+
 
 
 // --- screen render loop -------------------------------------------
