@@ -394,7 +394,7 @@ tDot.render = function()
 	program.sety(this.randY())
 	program.write(this._char, this.randColor() + ' bg')
 }	
-tDot._ttl = 15
+tDot._ttl = 10
 tDot.attachToKey("z")
 
 {
@@ -402,6 +402,24 @@ tDot.attachToKey("z")
 	dot._char = "  "
 	dot._ttl = 0
 	dot.toggleAttachToKey("x")
+}
+
+{
+	var dot2 = tDot.clone()
+	dot2._ttl = 1
+	/*
+	dot2._ttl = 10
+	dot2.start2 = function()
+	{
+		program.setx(this.randX())
+		program.sety(this.randY())
+	}
+	dot2.render2 = function()
+	{
+		program.write(this._char, this.randColor() + ' bg')
+	}	
+	*/
+	dot2.attachToKey("c")
 }
 
 // --- TextBlob ------------------------------
@@ -698,36 +716,57 @@ screen.step = function()
 
 // --- setting the speed with number keys ---
 
-intervalObj = setInterval( function () { screen.step() } , 50)
+intervalObj = null
+isPaused = false
+
+function setDt(dt)
+{
+	clearInterval(intervalObj)
+	intervalObj = setInterval( function () { screen.step() } , dt)
+	lastDt = dt	
+}
+
+setDt(50)
+
+screen.key(['0'], function(ch, key) 
+{	
+	if (isPaused)
+	{
+		isPaused = false
+		setDt(lastDt)
+	}
+	else
+	{
+		isPaused = true
+		clearInterval(intervalObj)
+	}
+
+});
 
 screen.key(['1'], function(ch, key) 
 {
-	clearInterval(intervalObj)
-	intervalObj = setInterval( function () { screen.step() } , 500)
+	setDt(500)
 });
 
 screen.key(['2'], function(ch, key) 
 {
-	clearInterval(intervalObj)
-	intervalObj = setInterval( function () { screen.step() } , 250)
+	setDt(250)
+
 });
 
 screen.key(['3'], function(ch, key) 
 {
-	clearInterval(intervalObj)
-	intervalObj = setInterval( function () { screen.step() } , 120)
+	setDt(120)
 });
 
 screen.key(['4'], function(ch, key) 
 {
-	clearInterval(intervalObj)
-	intervalObj = setInterval( function () { screen.step() } , 50)
+	setDt(50)
 });
 
 screen.key(['5'], function(ch, key) 
 {
-	clearInterval(intervalObj)
-	intervalObj = setInterval( function () { screen.step() } , 23)
+	setDt(25)
 });
 
 // --- escape key -------------------------------------------
