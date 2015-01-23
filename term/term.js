@@ -73,6 +73,8 @@ var Thing = {
 	clone: function()
 	{
 		var obj = {}
+		obj.__proto__ = this
+		/*
 		for (var k in this)
 		{
 			if (this.hasOwnProperty(k))
@@ -80,6 +82,7 @@ var Thing = {
 				obj[k] = this[k]
 			}
 		}
+		*/
 		obj.init()
 		return obj
 	},
@@ -135,9 +138,32 @@ var Thing = {
 		return this._blockString
 	},
 	
+	_paletteNum: 0,
+	
+	_palettes: [
+			["#fff", "#f00", "#0f0", "#ff0", "#00f", "#0ff", "#f0f"],
+			["#111", "#222", "#333", "#444", "#555", "#666"]
+			//["#f00", "#f33", "#f66", "#f99", "#fcc"]
+		],
+	
+	nextPalette: function()
+	{
+		this._paletteNum ++
+		
+		if (this._paletteNum > this._palettes.length - 1)
+		{
+			this._paletteNum = 0
+		}
+	},
+	
+	palette: function()
+	{
+		return this._palettes[this._paletteNum]
+	},
+	
 	randColor: function()
 	{
-		return ["#fff", "#f00", "#0f0", "#ff0", "#00f", "#0ff", "#f0f"].pickAny()
+		return this.palette().pickAny()
 	},
 	
 	randChar: function()
@@ -236,7 +262,7 @@ Boxed.start = function()
 {
 	Thing.start.apply(this)
 	
-	//if (this._box == null)
+	if (this._box == null)
 	{
 		this._box = this.newBox()
 		this.screenAppend(this._box)
@@ -246,6 +272,7 @@ Boxed.start = function()
 Boxed.stop = function()
 {
 	Thing.stop.apply(this)
+	this.screenRemove(this._box)
 	this._box = null
 }
 
@@ -704,8 +731,8 @@ function rgbToHex(r, g, b)
     return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 }
 
-Photo = Thing.clone()
-Photo._ttl = 0
+Photo = Boxed.clone()
+Photo._ttl = 1000
 Photo._x = 0
 Photo._y = 0
 Photo.width = function()
@@ -718,46 +745,100 @@ Photo.height = function()
 	return this._pixels.shape[1]
 }
 
+Photo._isSetup = false
+
 Photo.center = function()
 {
-	this._x = (screen.width - this.width())/2
-	this._y = (screen.height - this.height())/2
+//	if (!this._isSetup)
+	{
+		this._isSetup = true
+		this._x = (screen.width - this.width())/2
+		this._y = (screen.height - this.height())/2
+/*
+		this._box.top = this._y
+		this._box.left = this._x
+		this._box.width = this.width()
+		this._box.height = this.height()
+		this._box.setText(this.content())	
+		this._box.style.fg = "#fff"
+		*/
+	}
 }
 
 Photo.render = function()
 {
 	var pixels = this.pixels()
+
 	if (pixels == null) 
 	{
-		//console.log("skipping '" + this._name + "'")
 		return
 	}
-	//console.log("drawing '" + this._name + "'")
 
 	this.center()
+
 	var w = this.width()
 	var h = this.height()
 	
-	for (var x = 0; x < w && x + this._x < screen.width; x ++)
+	for (var x = 0; x < w && x + this._x < screen.width -1 && x + this._x > 0; x ++)
 	{
-		for (var y = 0; y < h && y + this._y < screen.height; y ++)
+		for (var y = 0; y < h && y + this._y < screen.height -1 && y + this._y > 0; y ++)
 		{
 			var r = pixels.get(x, y, 0)
 			var g = pixels.get(x, y, 1)
 			var b = pixels.get(x, y, 2)
-			if (r+g+b < 256*3*.8)
+			
+			if (r + g + b < 256*3*.8)
 			{
-				program.setx(x + this._x)
-				program.sety(y + this._y)
-				//var color = rgbToHex(r, g, b) + " bg"
-				//console.log(color)
-				program.write('x', "#fff fg")
+				var px = x + this._x
+				var py = y + this._y
+				//if (px > 0 && py > 0 && px < screen.width - 1 && px < screen.height - 1)
+				{
+					program.setx(px)
+					program.sety(py)
+					//var color = rgbToHex(r, g, b) + " bg"
+					//program.write('x', color)
+					program.write('x', "#fff fg")
+				}
 			}
 		}
 	}
 }
+Photo._content = null
+Photo.content = function()
+{
+	var pixels = this.pixels()
+	
+	if (pixels && this._content == null) 
+	{
+		this._content = ""
+		var w = this.width()
+		var h = this.height()
+	
+		for (var y = 0; y < h && y + this._y < screen.height -1; y ++)
+		{
+			for (var x = 0; x < w && x + this._x < screen.width -1; x ++)
+			{
+				var r = pixels.get(x, y, 0)
+				var g = pixels.get(x, y, 1)
+				var b = pixels.get(x, y, 2)
+				
+				if (r+g+b < 256*3*.8)
+				{
+					this._content = this._content + "x"
+				}
+				else
+				{
+					this._content = this._content + " "
+				}
+			}
+			this._content = this._content + "\n"
+		}
+	}
+	
+	return this._content
+}
 
-Photo._name = "a.png"
+Photo._name = "cat.png"
 Photo._pixels = null
 Photo._isLoading = false
 
@@ -869,13 +950,30 @@ screen.key(['3'], function(ch, key)
 
 screen.key(['4'], function(ch, key) 
 {
-	setDt(50)
+	setDt(80)
 });
 
 screen.key(['5'], function(ch, key) 
 {
+	setDt(50)
+});
+
+screen.key(['6'], function(ch, key) 
+{
 	setDt(25)
 });
+
+screen.key(['7'], function(ch, key) 
+{
+	setDt(5)
+});
+
+screen.key(['\\'], function(ch, key) 
+{
+	Thing.nextPalette()
+});
+
+
 
 // --- escape key -------------------------------------------
 
