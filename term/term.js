@@ -509,6 +509,30 @@ Blob.render = function()
 	}
 }
 
+Blob.makeVertical = function()
+{
+	if (this._kind == "vertical")
+	{
+		this.randBoxX()
+		this.randBoxWidth()
+		this.randBoxY()
+		this.randBoxHeight()
+	}
+  	this._kind = "vertical"	
+}
+
+Blob.makeHorizontal = function()
+{
+	if (this._kind == "horizontal")
+	{
+		this.randBoxX()
+		this.randBoxWidth()
+		this.randBoxY()
+		this.randBoxHeight()
+	}
+  	this._kind = "horizontal"	
+}
+
 
 Blob._ttl = 0
 Blob._kind = "random"
@@ -522,12 +546,12 @@ screen.key(["w"], function(ch, key)
 
 screen.key(["e"], function(ch, key) 
 {
-  	Blob._kind = "vertical"
+  	Blob.makeVertical()
 });	
 
 screen.key(["r"], function(ch, key) 
 {
-  	Blob._kind = "horizontal"
+  	Blob.makeHorizontal()
 });
 
 screen.key(["t"], function(ch, key) 
@@ -547,12 +571,12 @@ screen.key(["s"], function(ch, key)
 
 screen.key(["d"], function(ch, key) 
 {
-  	Blob2._kind = "vertical"
+  	Blob2.makeVertical()
 });	
 
 screen.key(["f"], function(ch, key) 
 {
-  	Blob2._kind = "horizontal"
+  	Blob2.makeHorizontal()
 });
 
 screen.key(["g"], function(ch, key) 
