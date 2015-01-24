@@ -74,7 +74,7 @@ var Thing = {
 	{
 		var obj = {}
 		obj.__proto__ = this
-		/*
+
 		for (var k in this)
 		{
 			if (this.hasOwnProperty(k))
@@ -82,7 +82,7 @@ var Thing = {
 				obj[k] = this[k]
 			}
 		}
-		*/
+
 		obj.init()
 		return obj
 	},
@@ -258,22 +258,37 @@ var Thing = {
 var Boxed = Thing.clone()
 Boxed._box = null
 
+Boxed._boxActive = false
+
+Boxed.box = function()
+{
+	if (this._box == null)
+	{
+		this._box = this.newBox()
+	}
+	
+	return this._box
+}
+
 Boxed.start = function()
 {
 	Thing.start.apply(this)
 	
-	if (this._box == null)
+	if (!this._boxActive)
 	{
-		this._box = this.newBox()
-		this.screenAppend(this._box)
+		this._boxActive = true
+		this.screenAppend(this.box())
 	}
 }
 
 Boxed.stop = function()
 {
 	Thing.stop.apply(this)
-	this.screenRemove(this._box)
-	this._box = null
+	if (this._box)
+	{
+		this.screenRemove(this._box)
+		this._boxActive = false
+	}
 }
 
 // --- hLine -----------------------
@@ -456,45 +471,50 @@ var Blob = Boxed.clone()
 Blob.start = function()
 {
 	Boxed.start.apply(this)
-	this._box.ch = this.randChar()
+	this.box().ch = this.randChar()
 }
 
 Blob.randBoxFgColor = function()
 {
-	this._box.style.fg = this.randColor()
+	this.box().style.fg = this.randColor()
 }
 
 Blob.randBoxBgColor = function()
 {
-	this._box.style.bg = this.randColor()
+	this.box().style.bg = this.randColor()
 }
 
 Blob.randBoxX = function()
 {
-	var w = this._box.width
-	this._box.left = Math.floor(Math.random()*(screen.width - 2))
-	this._box.width = w
+	var box =  this.box()
+	var w = box.width
+	if (box == null)
+	{
+	console.log("box = ", box)
+	}
+	box.left = Math.floor(Math.random()*(screen.width - 2))
+	box.width = w
 }
 
 Blob.randBoxWidth = function()
 {
 	do {
-		this._box.width = Math.floor(Math.random()*(screen.width  - this._box.left))
-	} while (this._box.width * this._box.height > screen.width * screen.height *.25)
+		this.box().width = Math.floor(Math.random()*(screen.width  - this.box().left))
+	} while (this.box().width * this.box().height > screen.width * screen.height *.25)
 }
 
 Blob.randBoxY = function()
 {
-	var h = this._box.height
-	this._box.top = Math.floor(Math.random()*(screen.height  - 2))
-	this._box.height = h
+	var h = this.box().height
+	this.box().top = Math.floor(Math.random()*(screen.height  - 2))
+	this.box().height = h
 }
 
 Blob.randBoxHeight = function()
 {
 	do {
-		this._box.height = Math.floor(Math.random()*(screen.height - this._box.top))
-	} while (this._box.width * this._box.height > screen.width * screen.height *.25)
+		this.box().height = Math.floor(Math.random()*(screen.height - this.box().top))
+	} while (this.box().width * this.box().height > screen.width * screen.height *.25)
 }
 
 Blob.randBox = function()
@@ -529,13 +549,13 @@ Blob.render = function()
 
 	if (this._isSolid)
 	{
-		this._box.ch = " "
+		this.box().ch = " "
 		this.randBoxBgColor()
 	}
 	else
 	{
-		this._box.style.bg = "#000"
-		this._box.ch = this.randChar()
+		this.box().style.bg = "#000"
+		this.box().ch = this.randChar()
 		this.randBoxFgColor()
 	}
 }
@@ -623,12 +643,12 @@ var Flash = Boxed.clone()
 Flash.start = function()
 {
 	Boxed.start.apply(this)
-	this._box.ch = ' '
-	this._box.left = 0
-	this._box.top = 0
-	this._box.width = screen.width
-	this._box.height = screen.height
-	this._box.style.bg = "#fff"
+	this.box().ch = ' '
+	this.box().left = 0
+	this.box().top = 0
+	this.box().width = screen.width
+	this.box().height = screen.height
+	this.box().style.bg = "#fff"
 	//this.middle()
 }
 
@@ -636,11 +656,11 @@ Flash.middle = function()
 {
 	var h = 10
 	var w = h*3
-	this._box.left = Math.floor((screen.width - w)/2)
-	this._box.top = Math.floor((screen.height - h)/2)
-	this._box.width = w
-	this._box.height = h	
-	//console.log("this._box.top = " + this._box.top)
+	this.box().left = Math.floor((screen.width - w)/2)
+	this.box().top = Math.floor((screen.height - h)/2)
+	this.box().width = w
+	this.box().height = h	
+	//console.log("this.box().top = " + this.box().top)
 }
 
 Flash.render = function()
@@ -654,7 +674,7 @@ Flash._ttl = 1
 	flash.start = function()
 	{
 		Flash.start.apply(this)
-		this._box.style.bg = "#f00"
+		this.box().style.bg = "#f00"
 	}
 	flash.attachToKey("u")
 }
@@ -664,7 +684,7 @@ Flash._ttl = 1
 	flash.start = function()
 	{
 		Flash.start.apply(this)
-		this._box.style.bg = "#0f0"
+		this.box().style.bg = "#0f0"
 	}
 	flash.attachToKey("i")
 }
@@ -674,7 +694,7 @@ Flash._ttl = 1
 	flash.start = function()
 	{
 		Flash.start.apply(this)
-		this._box.style.bg = "#00f"
+		this.box().style.bg = "#00f"
 	}
 	flash.attachToKey("o")
 }
@@ -692,7 +712,7 @@ Blinker.start = function()
 Blinker.render = function()
 {
 	//var color = this._age % 5 ? "#fff" : "#000"
-	//this._box.style.bg = color
+	//this.box().style.bg = color
 }
 Blinker.attachToKey("[")
 
@@ -704,15 +724,15 @@ Blinker.attachToKey("[")
 	{
 		Flash.start.apply(this)
 		this.randBox()
-		this._box.style.bg = "#000"
-		this._box.style.fg = this.randColor()
-		this._box.ch = this.randChar()
+		this.box().style.bg = "#000"
+		this.box().style.fg = this.randColor()
+		this.box().ch = this.randChar()
 		this._ttl = 1
 	}
 	TextBlinker.render = function()
 	{
 		//var color = this._age % 5 ? "#fff" : "#000"
-		//this._box.style.bg = color
+		//this.box().style.bg = color
 	}
 	TextBlinker.attachToKey("]")
 }
@@ -755,12 +775,12 @@ Photo.center = function()
 		this._x = (screen.width - this.width())/2
 		this._y = (screen.height - this.height())/2
 /*
-		this._box.top = this._y
-		this._box.left = this._x
-		this._box.width = this.width()
-		this._box.height = this.height()
-		this._box.setText(this.content())	
-		this._box.style.fg = "#fff"
+		this.box().top = this._y
+		this.box().left = this._x
+		this.box().width = this.width()
+		this.box().height = this.height()
+		this.box().setText(this.content())	
+		this.box().style.fg = "#fff"
 		*/
 	}
 }
