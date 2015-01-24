@@ -74,7 +74,7 @@ var Thing = {
 	{
 		var obj = {}
 		obj.__proto__ = this
-
+/*
 		for (var k in this)
 		{
 			if (this.hasOwnProperty(k))
@@ -82,7 +82,7 @@ var Thing = {
 				obj[k] = this[k]
 			}
 		}
-
+*/
 		obj.init()
 		return obj
 	},
