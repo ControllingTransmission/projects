@@ -88,6 +88,12 @@ Printer =
 		return this.chars().pickAny()
 	},
 	
+	cycleColor: function()
+	{
+		var p = this.palette()
+		return p[Math.floor(screen._age/10) % p.length]
+	},
+	
 	pulseColor: function(v)
 	{
 		if (v == null)
@@ -127,15 +133,25 @@ Printer =
 		}
 		else
 		{
+			var color = "#fff"
+			
+			//if (this._colorFunc)
+			{
+				color = this._colorFunc.apply(this) + " fg"
+			}
+			/*else
+			{
+				color = this.pulseColor() + " fg"
+			}
+			*/
+				
 			if (this._stack.length)
 			{
 				var s = this._stack.pop()
-				var color = this.pulseColor() + " fg"
 				program.write(s + "\n", color)
 			}
 			else
 			{
-				var color = this.pulseColor() + " fg"
 				program.write(this.string() + "\n", color)
 			}
 		}
@@ -195,6 +211,7 @@ Printer =
 	},
 	
 	_stack: [],
+	_colorFunc: null,
 	
 	pushBlock: function()
 	{
@@ -228,9 +245,7 @@ Printer =
 		s = s + s.reverse()
 		this._stack.push(s)
 	},
-	
-
-	
+		
 	pushBlock4: function(c)
 	{
 		if (c == null)
@@ -277,6 +292,8 @@ Printer =
 	},
 
 }
+
+Printer._colorFunc = Printer.pulseColor
 
 // ----------
 
@@ -327,6 +344,17 @@ screen.key(['l'], function(ch, key)
 });
 
 
+// --- color ---
+
+screen.key(['q'], function(ch, key) 
+{
+	Printer._colorFunc = Printer.pulseColor
+});
+
+screen.key(['w'], function(ch, key) 
+{
+	Printer._colorFunc = Printer.cycleColor
+});
 
 
 // ----------
@@ -343,17 +371,17 @@ screen.key(['n'], function(ch, key)
 
 screen.key(['b'], function(ch, key) 
 {
-	Printer.setPulse(.1)
+	Printer.setPulse(2/screen.width)
 });
 
 screen.key(['v'], function(ch, key) 
 {
-	Printer.setPulse(.25)
+	Printer.setPulse(.1)
 });
 
 screen.key(['c'], function(ch, key) 
 {
-	Printer.setPulse(.5)
+	Printer.setPulse(.4)
 });
 
 screen.key(['x'], function(ch, key) 
