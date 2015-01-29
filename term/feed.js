@@ -124,6 +124,8 @@ Printer =
 		return "#00f"
 	},
 	
+	_ypos: null,
+
 	print: function()
 	{
 		this._pulse *= .99
@@ -133,17 +135,13 @@ Printer =
 		}
 		else
 		{
-			var color = "#fff"
+			var color = this._colorFunc.apply(this) + " fg"
 			
-			//if (this._colorFunc)
+			if (this._ypos != null)
 			{
-				color = this._colorFunc.apply(this) + " fg"
+				program.setx(0)
+				program.sety(this._ypos)
 			}
-			/*else
-			{
-				color = this.pulseColor() + " fg"
-			}
-			*/
 				
 			if (this._stack.length)
 			{
@@ -290,7 +288,6 @@ Printer =
 			this._stack.push(s)
 		}
 	},
-
 }
 
 Printer._colorFunc = Printer.pulseColor
@@ -343,6 +340,19 @@ screen.key(['l'], function(ch, key)
 	Printer.pushBlock5("`")
 });
 
+// --- pos ---
+
+screen.key(['p'], function(ch, key) 
+{
+	if (Printer._ypos == null)
+	{
+		Printer._ypos = Math.floor(screen.height/2)
+	}
+	else
+	{
+		Printer._ypos = null
+	}
+});
 
 // --- color ---
 
