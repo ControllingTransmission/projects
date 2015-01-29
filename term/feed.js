@@ -125,7 +125,23 @@ Printer =
 	},
 	
 	_ypos: null,
-
+	
+	_colorPlace: " fg",
+	
+	/*
+	toggleColorPlace: function()
+	{
+		if (this._colorPlace == " fg")
+		{
+			this._colorPlace = " bg"
+		}
+		else
+		{
+			this._colorPlace = " fg"
+		}
+	},
+	*/
+	
 	print: function()
 	{
 		this._pulse *= .99
@@ -135,22 +151,38 @@ Printer =
 		}
 		else
 		{
-			var color = this._colorFunc.apply(this) + " fg"
+			var color = this._colorFunc.apply(this) + this._colorPlace
+			var ret = "\n"
 			
 			if (this._ypos != null)
 			{
+				/*
+				var s = this.randChar().repeat(screen.width)
+				var h = screen.height
+				for (var i = 0; i < 10; i++)
+				{
+					program.setx(0)
+					program.sety(Math.floor((Math.random())*screen.height))
+					program.write(s, color)
+				}
+				*/
 				program.setx(0)
-				program.sety(this._ypos)
+				//program.sety(Math.floor((Math.random())*screen.height))
+				program.sety(Math.floor(screen.height/2) + Math.floor((Math.random()-.5)*3))
+				//program.sety(Math.floor(screen.height/2))
+				ret = ""
 			}
-				
+			
+
+			
 			if (this._stack.length)
 			{
 				var s = this._stack.pop()
-				program.write(s + "\n", color)
+				program.write(s + ret, color)
 			}
 			else
 			{
-				program.write(this.string() + "\n", color)
+				program.write(this.string() + ret, color)
 			}
 		}
 	},
@@ -197,7 +229,8 @@ Printer =
 		var s = this.randChar().repeat(n) 
 	 	var pad = " ".repeat(Math.floor((screen.width - s.length)/2))
 	
-		this._string = pad + s
+		this._string = pad + s 
+		this._string += " ".repeat(screen.width - this._string.length)
 		return this._string
 	},
 	
@@ -364,6 +397,11 @@ screen.key(['q'], function(ch, key)
 screen.key(['w'], function(ch, key) 
 {
 	Printer._colorFunc = Printer.cycleColor
+});
+
+screen.key(['e'], function(ch, key) 
+{
+	//Printer.toggleColorPlace()
 });
 
 
