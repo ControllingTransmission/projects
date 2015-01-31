@@ -3,6 +3,7 @@
 //var AudioContext = require('web-audio-api').AudioContext
 //var AudioContextMonkeyPatch = require('audioinput/AudioContextMonkeyPatch');
 //var Spectrum = require('./audioinput/Spectrum');
+require('./extra.js');
 
 var fs = require('fs')
 var blessed = require('blessed')
@@ -13,43 +14,99 @@ screen.fastCSR = true
 screen.useBCE = true
 screen.autoPadding = false
 screen.alloc()
-
 screen._age = 0
-
-// ----------------------------
-
-String.prototype.reverse = function()
-{
-    return this.split("").reverse().join("");
-}
-
-String.prototype.repeat = function( num )
-{
-	num = Math.floor(num)
-	
-	if (num < 0)
-	{
-		num = 0
-	}
-	
-	if (num == 0)
-	{
-		return ""
-	}
-		
-    return new Array( num + 1 ).join( this );
-}
-
-Array.prototype.pickAny = function()
-{
-	var i = Math.floor(Math.random() * this.length) % this.length
-	return this[i]
-}
-
-// ----------------------------
 
 Printer = 
 {
+	
+	// --- printFuncs ---------------------
+	
+	_printFuncs: [],
+	
+	addPrintFunc: function(f)
+	{
+		this._printFuncs.appendIfAbsent(f)
+		return this
+	},
+	
+	removePrintFunc: function(f)
+	{
+		this._printFuncs.remove(f)
+		return this
+	},
+	
+	capString: function(s)
+	{
+		if(s.length < screen.width)
+		{
+			s += " ".repeat(screen.width - s.length)
+		}
+		else if(s.length > screen.width)
+		{
+			s = s.substring(0, screen.width)
+		}
+		
+		return s
+	},
+	
+	mergeStrings: function(s1, s2)
+	{
+		// s2 overwrites s1 unless s2 char is a space
+		
+		s1 = this.capString(s1)
+		s2 = this.capString(s2)
+		
+		var out = ""
+		
+		for (var i = 0; i < s1.length; i ++)
+		{
+			var c1 = s1.charAt(i)
+			var c2 = s2.charAt(i)
+			
+			if (c2 == " ")
+			{
+				out += c1
+			}
+			else
+			{
+				out += c2
+			}
+		}
+		
+		return out
+	},
+	
+	renderFuncsString: function()
+	{
+		var funcsToRemove = []
+		var s = ""
+		
+		for (var i = 0; i < this._printFuncs.length; i ++)
+		{
+			var f = this._printFuncs[i]
+			var s2 = f.apply(this)
+			
+			if (s2 == null)
+			{
+				funcsToRemove.push(f)
+			}
+			else
+			{
+				s = this.mergeStrings(s, s2)
+			}
+		}
+		
+		for (var i = 0; i < funcsToRemove.length; i ++)
+		{
+			var f = funcsToRemove[i]
+			this.removePrintFunc(f)
+		}
+		
+		return s
+	},
+	
+	// --- colors ---------------------
+	
 	_palettes: [
 			["#fff", "#f00", "#0f0", "#ff0", "#00f", "#0ff", "#f0f"],
 			["#111", "#222", "#333", "#444", "#555", "#666"]
@@ -139,66 +196,35 @@ Printer =
 	
 	_ypos: null,
 	
-	_colorPlace: " fg",
-	
-	/*
-	toggleColorPlace: function()
+	currentColor: function()
 	{
-		if (this._colorPlace == " fg")
-		{
-			this._colorPlace = " bg"
-		}
-		else
-		{
-			this._colorPlace = " fg"
-		}
+		var color = this._colorFunc.apply(this) + " fg"
+		return color
 	},
-	*/
+	
+	// -----------------------------------------------------------
 	
 	print: function()
 	{
 		this._pulse *= .99
+		
 		if (this._isMuted)
 		{
 			console.log("")
 		}
 		else
 		{
-			var color = this._colorFunc.apply(this) + this._colorPlace
+			var color = this.currentColor()
 			var ret = "\n"
 			
 			if (this._ypos != null)
 			{
-				/*
-				var s = this.randChar().repeat(screen.width)
-				var h = screen.height
-				for (var i = 0; i < 10; i++)
-				{
-					program.setx(0)
-					program.sety(Math.floor((Math.random())*screen.height))
-					program.write(s, color)
-				}
-				*/
 				program.setx(0)
-				//program.sety(Math.floor((Math.random())*screen.height))
-				program.sety(Math.floor(screen.height/2) + Math.floor((Math.random()-.5)*3))
-				//program.sety(Math.floor(screen.height/2))
+				program.sety(Math.floor(screen.height*Math.random()))
 				ret = ""
 			}
 			
-			/*
-			if (this._codeMode && screen._age % 2)
-			{
-				var s = this.randCode()	
-				program.write(s + ret, color)
-			}					
-			else 
-			*/
-			
-
-			
 			var s = ""
-
 		
 			if (this._stack.length)
 			{
@@ -219,13 +245,15 @@ Printer =
 				s = this.mirrorString(s) 
 			}
 			
-			program.write(s + ret, color)
+			var out = s + ret
+			//if (out.trim() != "")
+			{
+				program.write(out, color)
+			}
 		}
 	},
 	
 	_isMuted: false,
-			//var n = Math.floor(screen.width*Math.random())
-			//var n = Math.floor((screen.width-1)*(1+Math.sin(screen._age/10))/2)
 			
 	_pulses: [],
 	_pulse: 0,
@@ -578,7 +606,6 @@ fs.readFile('data/hexi.txt', 'utf8', function (err,data) {
 
 // ----------
 
-
 screen.key(['a'], function(ch, key) 
 {
 	Printer.pushBlock()
@@ -594,7 +621,7 @@ screen.key(['d'], function(ch, key)
 	Printer.pushBlock3()
 });
 
-// solid screen
+// --- fill screen
 
 screen.key(['r'], function(ch, key) 
 {
@@ -680,15 +707,12 @@ screen.key(['/'], function(ch, key)
 	Printer._bikeShifts = !Printer._bikeShifts
 });
 
-
-
 // mirror
 
 screen.key([']'], function(ch, key) 
 {
 	Printer.toggleMirrorMode()
 });
-
 
 // --- pos ---
 
@@ -722,11 +746,7 @@ screen.key(['e'], function(ch, key)
 	Printer._colorFunc = Printer.cycleColor
 });
 
-
-// ----------
-
-
-// --- meter
+// --- meter ---
 
 screen.key(['z'], function(ch, key) 
 {
@@ -763,15 +783,9 @@ screen.key(['m'], function(ch, key)
 	Printer.nextPulseStyle()
 });
 
-
-
-
-
-
-
 // ----------
 
-program.hideCursor()
+//program.hideCursor()
 
 screen.step = function()
 {
@@ -854,8 +868,6 @@ screen.key(['9'], function(ch, key)
 {
 	setDt(lastDt - 3)
 });
-
-
 
 // --- escape key -------------------------------------------
 
