@@ -1,0 +1,1234 @@
+
+401000: 6A 20                           push    20h         // function argument
+        E8 09 00 00 00                  call    401010
+        83 C4 04                        add     esp,4       // stack restore after c-style call
+        33 C0                           xor     eax,eax     // clear register
+        C3                              ret                 // c-style return from procedure
+401010: 51                              push    ecx         // adjust stack for local variables
+        53                              push    ebx         // | [shorter version than sub esp,...]
+        8B 5C 24 0C                     mov     ebx,dword ptr [esp+0Ch]     // function argument
+        56                              push    esi         // save non-volatile registers
+        33 F6                           xor     esi,esi
+        85 DB                           test    ebx,ebx     // compare to zero [instead cmp ebx,0]
+        7E 3F                           jle     40105C      // | [zero looping special case]
+        57                              push    edi         // save some more non-volatile registers
+        8B 3D 84 40 40 00               mov     edi,dword ptr ds:[404084h]  // printf
+401024: 56                              push    esi
+        68 1C 20 40 00                  push    40201Ch     // c string literal
+        FF D7                           call    edi         // indirect call
+        83 C4 08                        add     esp,8
+        8D 44 24 14                     lea     eax,dword ptr [esp+14h]     // stack variable address
+        8D 4C 24 0C                     lea     ecx,dword ptr [esp+0Ch]
+        50                              push    eax         // [parameter reused as variable]
+        51                              push    ecx
+        56                              push    esi
+        E8 F1 04 00 00                  call    401530
+        8B 54 24 20                     mov     edx,dword ptr [esp+20h]
+        8B 44 24 18                     mov     eax,dword ptr [esp+18h]
+        83 C4 0C                        add     esp,0Ch     // [delayed stack cleanup]
+        52                              push    edx
+        50                              push    eax
+        68 00 20 40 00                  push    402000h
+        FF D7                           call    edi
+        83 C4 0C                        add     esp,0Ch
+        46                              inc     esi         // [for-]loop increment
+        3B F3                           cmp     esi,ebx
+        7C C9                           jl      401024      // loop jump
+        5F                              pop     edi         // restore non-volatile registers
+40105C: 5E                              pop     esi         // |
+        5B                              pop     ebx
+        59                              pop     ecx
+        C3                              ret
+401060: 81 EC 88 00 00 00               sub     esp,88h     // get stack area for local data
+        56                              push    esi
+        8B B4 24 90 00 00 00            mov     esi,dword ptr [esp+90h]
+        8D 44 24 0C                     lea     eax,dword ptr [esp+0Ch]
+        56                              push    esi
+        50                              push    eax
+        E8 77 08 00 00                  call    4018F0
+        83 C4 08                        add     esp,8
+        8D 44 24 04                     lea     eax,dword ptr [esp+4]
+        8D 8C 24 94 00 00 00            lea     ecx,dword ptr [esp+94h]
+        8D 94 24 98 00 00 00            lea     edx,dword ptr [esp+98h]
+        50                              push    eax
+        68 D0 14 40 00                  push    4014D0h     // function pointer
+        89 4C 24 0C                     mov     dword ptr [esp+0Ch],ecx
+        56                              push    esi
+        56                              push    esi
+        8D 4C 24 1C                     lea     ecx,dword ptr [esp+1Ch]
+        56                              push    esi
+        51                              push    ecx
+        89 54 24 20                     mov     dword ptr [esp+20h],edx
+        E8 17 00 00 00                  call    4010C0
+        83 C4 18                        add     esp,18h
+        5E                              pop     esi
+        81 C4 88 00 00 00               add     esp,88h     // stack cleanup
+        C3                              ret
+4010C0: 53                              push    ebx         // [realigned to 16 byte boundaries]
+        8B 5C 24 08                     mov     ebx,dword ptr [esp+8]
+        56                              push    esi
+        8B 74 24 14                     mov     esi,dword ptr [esp+14h]
+        57                              push    edi
+        8B 7C 24 14                     mov     edi,dword ptr [esp+14h]
+        85 F6                           test    esi,esi
+        7E 0A                           jle     4010DD
+        57                              push    edi
+        53                              push    ebx
+        E8 16 08 00 00                  call    4018F0
+        83 C4 08                        add     esp,8
+4010DD: 8B 44 24 24                     mov     eax,dword ptr [esp+24h]
+        8B 4C 24 20                     mov     ecx,dword ptr [esp+20h]
+        8B 54 24 1C                     mov     edx,dword ptr [esp+1Ch]
+        50                              push    eax         // [lots of function arguments]
+        51                              push    ecx         // |
+        52                              push    edx         // |
+        6A 00                           push    0           // |
+        6A 00                           push    0           // |
+        56                              push    esi         // |
+        57                              push    edi         // |
+        53                              push    ebx         // |
+        E8 08 00 00 00                  call    401100
+        83 C4 20                        add     esp,20h
+        5F                              pop     edi
+        5E                              pop     esi
+        5B                              pop     ebx
+        C3                              ret
+401100: 8B 44 24 18                     mov     eax,dword ptr [esp+18h]
+        53                              push    ebx         // save non-volatile registers
+        55                              push    ebp         // |
+        56                              push    esi         // |
+        85 C0                           test    eax,eax
+        57                              push    edi         // save more non-volatile registers
+        75 2A                           jne     401136      // delayed jump [to have uniform stack]
+        8B 44 24 2C                     mov     eax,dword ptr [esp+2Ch]
+        85 C0                           test    eax,eax
+        0F 84 CB 00 00 00               je      4011E3      // longer conditional jump
+        8B 4C 24 30                     mov     ecx,dword ptr [esp+30h]
+        8B 54 24 1C                     mov     edx,dword ptr [esp+1Ch]
+        51                              push    ecx
+        8B 4C 24 1C                     mov     ecx,dword ptr [esp+1Ch]
+        52                              push    edx
+        8B 54 24 1C                     mov     edx,dword ptr [esp+1Ch]
+        51                              push    ecx
+        52                              push    edx
+        FF D0                           call    eax         // indirect [function pointer] call
+        83 C4 10                        add     esp,10h
+        5F                              pop     edi         // restore non-volatile registers
+        5E                              pop     esi         // |
+        5D                              pop     ebp         // |
+        5B                              pop     ebx         // |
+        C3                              ret
+401136: 8B 6C 24 20                     mov     ebp,dword ptr [esp+20h]
+        8B 44 24 18                     mov     eax,dword ptr [esp+18h]
+        8B 74 24 24                     mov     esi,dword ptr [esp+24h]
+        3B E8                           cmp     ebp,eax     // zero looping test [special case]
+        0F 8D 99 00 00 00               jge     4011E3
+        8B 44 24 14                     mov     eax,dword ptr [esp+14h]
+        8D 3C A8                        lea     edi,dword ptr [eax+ebp*4]   // array addressing
+401151: 3B 74 24 1C                     cmp     esi,dword ptr [esp+1Ch]
+        7D 6E                           jge     4011C5
+401157: 8B 1F                           mov     ebx,dword ptr [edi]
+        8B 44 24 28                     mov     eax,dword ptr [esp+28h]
+        BA 01 00 00 00                  mov     edx,1       // nth bit
+        8B CE                           mov     ecx,esi     // |
+        D3 E2                           shl     edx,cl      // |
+        8B 4C 24 1C                     mov     ecx,dword ptr [esp+1Ch]
+        50                              push    eax
+        8B 44 24 18                     mov     eax,dword ptr [esp+18h]
+        56                              push    esi
+        55                              push    ebp
+        51                              push    ecx
+        0B D3                           or      edx,ebx     // set the bit
+        89 17                           mov     dword ptr [edi],edx
+        8B 54 24 28                     mov     edx,dword ptr [esp+28h]
+        52                              push    edx
+        50                              push    eax
+        E8 6F 00 00 00                  call    4011F0
+        83 C4 18                        add     esp,18h
+        83 F8 01                        cmp     eax,1
+        74 31                           je      4011BA      // [c continue]
+        83 F8 02                        cmp     eax,2
+        74 4E                           je      4011DC
+        8B 4C 24 30                     mov     ecx,dword ptr [esp+30h]
+        8B 44 24 28                     mov     eax,dword ptr [esp+28h]
+        8B 54 24 2C                     mov     edx,dword ptr [esp+2Ch]
+        51                              push    ecx
+        48                              dec     eax
+        52                              push    edx
+        8B 54 24 24                     mov     edx,dword ptr [esp+24h]
+        8D 4E 01                        lea     ecx,dword ptr [esi+1]   // esi+1
+        50                              push    eax
+        8B 44 24 24                     mov     eax,dword ptr [esp+24h]
+        51                              push    ecx
+        8B 4C 24 24                     mov     ecx,dword ptr [esp+24h]
+        55                              push    ebp
+        52                              push    edx
+        50                              push    eax
+        51                              push    ecx
+        E8 49 FF FF FF                  call    401100
+        83 C4 20                        add     esp,20h
+4011BA: 8B 44 24 1C                     mov     eax,dword ptr [esp+1Ch]     // loop increment
+        46                              inc     esi
+        3B F0                           cmp     esi,eax
+        89 1F                           mov     dword ptr [edi],ebx
+        7C 92                           jl      401157
+4011C5: 8B 44 24 18                     mov     eax,dword ptr [esp+18h]     // outer loop increment
+        33 F6                           xor     esi,esi
+        45                              inc     ebp
+        83 C7 04                        add     edi,4
+        3B E8                           cmp     ebp,eax
+        0F 8C 7A FF FF FF               jl      401151
+        5F                              pop     edi
+        5E                              pop     esi
+        5D                              pop     ebp
+        5B                              pop     ebx
+        C3                              ret
+4011DC: 8B 54 24 14                     mov     edx,dword ptr [esp+14h]
+        89 1C AA                        mov     dword ptr [edx+ebp*4],ebx
+4011E3: 5F                              pop     edi         // [code repetition]
+        5E                              pop     esi         // |
+        5D                              pop     ebp         // |
+        5B                              pop     ebx         // |
+        C3                              ret                 // |
+4011F0: 8B 44 24 0C                     mov     eax,dword ptr [esp+0Ch]
+        8B 54 24 14                     mov     edx,dword ptr [esp+14h]
+        53                              push    ebx
+        55                              push    ebp
+        8D 48 FF                        lea     ecx,dword ptr [eax-1]
+        56                              push    esi
+        8B 74 24 1C                     mov     esi,dword ptr [esp+1Ch]
+        57                              push    edi
+        8B 7C 24 14                     mov     edi,dword ptr [esp+14h]
+        3B D1                           cmp     edx,ecx
+        75 25                           jne     401230
+        8B 04 B7                        mov     eax,dword ptr [edi+esi*4]   // array access
+        85 C0                           test    eax,eax
+        75 0A                           jne     40121C
+        B8 01 00 00 00                  mov     eax,1
+        5F                              pop     edi
+        5E                              pop     esi
+        5D                              pop     ebp
+        5B                              pop     ebx
+        C3                              ret
+40121C: 85 F6                           test    esi,esi
+        7E 10                           jle     401230
+        85 44 B7 FC                     test    dword ptr [edi+esi*4-4],eax
+        75 0A                           jne     401230
+        B8 01 00 00 00                  mov     eax,1
+        5F                              pop     edi
+        5E                              pop     esi
+        5D                              pop     ebp
+        5B                              pop     ebx
+        C3                              ret
+401230: 85 D2                           test    edx,edx
+        75 2B                           jne     40125F
+        85 F6                           test    esi,esi
+        7E 27                           jle     40125F
+        8B 44 B7 FC                     mov     eax,dword ptr [edi+esi*4-4]
+        85 C0                           test    eax,eax
+        75 0A                           jne     40124A
+        B8 02 00 00 00                  mov     eax,2
+        5F                              pop     edi
+        5E                              pop     esi
+        5D                              pop     ebp
+        5B                              pop     ebx
+        C3                              ret
+40124A: 83 FE 01                        cmp     esi,1
+        7E 10                           jle     40125F
+        85 44 B7 F8                     test    dword ptr [edi+esi*4-8],eax
+        75 0A                           jne     40125F
+        B8 02 00 00 00                  mov     eax,2
+        5F                              pop     edi
+        5E                              pop     esi
+        5D                              pop     ebp
+        5B                              pop     ebx
+        C3                              ret
+40125F: 83 7C 24 28 01                  cmp     dword ptr [esp+28h],1
+        75 29                           jne     40128F
+        3B D1                           cmp     edx,ecx
+        74 25                           je      40128F
+        8B 04 B7                        mov     eax,dword ptr [edi+esi*4]
+        85 C0                           test    eax,eax
+        75 0A                           jne     40127B
+        B8 01 00 00 00                  mov     eax,1
+        5F                              pop     edi
+        5E                              pop     esi
+        5D                              pop     ebp
+        5B                              pop     ebx
+        C3                              ret
+40127B: 85 F6                           test    esi,esi
+        7E 10                           jle     40128F
+        85 44 B7 FC                     test    dword ptr [edi+esi*4-4],eax
+        75 0A                           jne     40128F
+        B8 01 00 00 00                  mov     eax,1
+        5F                              pop     edi
+        5E                              pop     esi
+        5D                              pop     ebp
+        5B                              pop     ebx
+        C3                              ret
+40128F: 8B 5C 24 18                     mov     ebx,dword ptr [esp+18h]
+        8D 6B FF                        lea     ebp,dword ptr [ebx-1]
+        3B F5                           cmp     esi,ebp
+        75 1E                           jne     4012B8
+        6A 00                           push    0
+        53                              push    ebx
+        57                              push    edi
+        E8 0D 06 00 00                  call    4018B0
+        83 C4 0C                        add     esp,0Ch
+        85 C0                           test    eax,eax
+        75 0A                           jne     4012B4
+        B8 01 00 00 00                  mov     eax,1
+        5F                              pop     edi
+        5E                              pop     esi
+        5D                              pop     ebp
+        5B                              pop     ebx
+        C3                              ret
+4012B4: 8B 54 24 24                     mov     edx,dword ptr [esp+24h]
+4012B8: 83 7C 24 28 01                  cmp     dword ptr [esp+28h],1
+        75 25                           jne     4012E4
+        3B F5                           cmp     esi,ebp
+        74 21                           je      4012E4
+        8D 4E 01                        lea     ecx,dword ptr [esi+1]
+        6A 00                           push    0
+        51                              push    ecx
+        57                              push    edi
+        E8 E1 05 00 00                  call    4018B0
+        83 C4 0C                        add     esp,0Ch
+        85 C0                           test    eax,eax
+        75 0A                           jne     4012E0
+        B8 02 00 00 00                  mov     eax,2
+        5F                              pop     edi
+        5E                              pop     esi
+        5D                              pop     ebp
+        5B                              pop     ebx
+        C3                              ret
+4012E0: 8B 54 24 24                     mov     edx,dword ptr [esp+24h]
+4012E4: 83 C3 FE                        add     ebx,0FEh
+        3B F3                           cmp     esi,ebx
+        0F 8D 83 00 00 00               jge     401372
+        8B 2C B7                        mov     ebp,dword ptr [edi+esi*4]
+        8D 5A 01                        lea     ebx,dword ptr [edx+1]
+        83 FB 20                        cmp     ebx,20h
+        73 2C                           jae     401326
+        8B 44 24 1C                     mov     eax,dword ptr [esp+1Ch]
+        85 C0                           test    eax,eax
+        7E 17                           jle     401319
+        B9 20 00 00 00                  mov     ecx,20h
+        83 CA FF                        or      edx,0FFh    // -1
+        2B C8                           sub     ecx,eax     // [massive instruction reordering]
+        83 C8 FF                        or      eax,0FFh
+        D3 EA                           shr     edx,cl      // bits up to
+        8B CB                           mov     ecx,ebx
+        D3 E0                           shl     eax,cl      // bits up from
+        23 C2                           and     eax,edx     // bits from to [bit range]
+        EB 0F                           jmp     401328
+401319: 83 C8 FF                        or      eax,0FFh
+        8B CB                           mov     ecx,ebx
+        D3 E0                           shl     eax,cl
+        33 D2                           xor     edx,edx     // 0
+        23 C2                           and     eax,edx     // 0 too
+        EB 02                           jmp     401328      // [questionable jump]
+401326: 33 C0                           xor     eax,eax
+401328: 8B D5                           mov     edx,ebp
+        0B D0                           or      edx,eax
+        89 14 B7                        mov     dword ptr [edi+esi*4],edx
+        8B 54 24 1C                     mov     edx,dword ptr [esp+1Ch]
+        85 D2                           test    edx,edx
+        7E 0E                           jle     401345
+        B9 20 00 00 00                  mov     ecx,20h
+        83 C8 FF                        or      eax,0FFh
+        2B CA                           sub     ecx,edx
+        D3 E8                           shr     eax,cl
+        EB 02                           jmp     401347
+401345: 33 C0                           xor     eax,eax
+401347: 89 44 B7 04                     mov     dword ptr [edi+esi*4+4],eax
+        8D 46 02                        lea     eax,dword ptr [esi+2]
+        52                              push    edx
+        50                              push    eax
+        57                              push    edi
+        E8 2A 00 00 00                  call    401380
+        83 C4 0C                        add     esp,0Ch
+        89 2C B7                        mov     dword ptr [edi+esi*4],ebp
+        85 C0                           test    eax,eax
+        C7 44 B7 04 00 00 00 00         mov     dword ptr [edi+esi*4+4],0
+        75 0A                           jne     401372
+        B8 01 00 00 00                  mov     eax,1
+        5F                              pop     edi
+        5E                              pop     esi
+        5D                              pop     ebp
+        5B                              pop     ebx
+        C3                              ret
+401372: 5F                              pop     edi
+        5E                              pop     esi
+        5D                              pop     ebp
+        33 C0                           xor     eax,eax
+        5B                              pop     ebx
+        C3                              ret
+401380: 81 EC 08 01 00 00               sub     esp,108h
+        8D 44 24 04                     lea     eax,dword ptr [esp+4]
+        8D 4C 24 00                     lea     ecx,dword ptr [esp]
+        53                              push    ebx
+        55                              push    ebp
+        8B AC 24 14 01 00 00            mov     ebp,dword ptr [esp+114h]
+        56                              push    esi
+        57                              push    edi
+        8B BC 24 20 01 00 00            mov     edi,dword ptr [esp+120h]
+        50                              push    eax
+        51                              push    ecx
+        57                              push    edi
+        55                              push    ebp
+        E8 E7 05 00 00                  call    401990
+        8B 44 24 20                     mov     eax,dword ptr [esp+20h]
+        83 C4 10                        add     esp,10h
+        83 F8 FF                        cmp     eax,0FFh    // compare to -1
+        0F 84 01 01 00 00               je      4014BA      // c return
+        8D 54 24 18                     lea     edx,dword ptr [esp+18h]
+        57                              push    edi
+        52                              push    edx
+        E8 2C 05 00 00                  call    4018F0
+        83 C4 08                        add     esp,8
+        8D 84 24 98 00 00 00            lea     eax,dword ptr [esp+98h]
+        57                              push    edi
+        50                              push    eax
+        E8 1B 05 00 00                  call    4018F0
+        8B 4C 24 18                     mov     ecx,dword ptr [esp+18h]
+        BA 01 00 00 00                  mov     edx,1
+        83 C4 08                        add     esp,8
+        8D 04 8D 00 00 00 00            lea     eax,dword ptr [ecx*4+0h]
+        8B 4C 24 14                     mov     ecx,dword ptr [esp+14h]
+        D3 E2                           shl     edx,cl
+        8B 4C 04 18                     mov     ecx,dword ptr [esp+eax+18h]
+        0B CA                           or      ecx,edx
+        89 4C 04 18                     mov     dword ptr [esp+eax+18h],ecx
+        89 8C 04 98 00 00 00            mov     dword ptr [esp+eax+98h],ecx
+4013FF: 33 C9                           xor     ecx,ecx
+        85 FF                           test    edi,edi
+        89 4C 24 10                     mov     dword ptr [esp+10h],ecx
+        7E 47                           jle     401450
+        8D 5F FF                        lea     ebx,dword ptr [edi-1]
+40140C: 8B 84 8C 98 00 00 00            mov     eax,dword ptr [esp+ecx*4+98h]
+        8D B4 8C 98 00 00 00            lea     esi,dword ptr [esp+ecx*4+98h]
+        3B CB                           cmp     ecx,ebx
+        7D 04                           jge     401422
+        0B 44 8C 1C                     or      eax,dword ptr [esp+ecx*4+1Ch]
+401422: 85 C9                           test    ecx,ecx
+        7E 04                           jle     40142A
+        0B 44 8C 14                     or      eax,dword ptr [esp+ecx*4+14h]
+40142A: 8B 54 8C 18                     mov     edx,dword ptr [esp+ecx*4+18h]
+        8B EA                           mov     ebp,edx
+        03 D2                           add     edx,edx     // *=2
+        D1 FD                           sar     ebp,1       // /=2
+        0B C5                           or      eax,ebp
+        8B AC 24 1C 01 00 00            mov     ebp,dword ptr [esp+11Ch]
+        0B C2                           or      eax,edx
+        8B 54 8D 00                     mov     edx,dword ptr [ebp+ecx*4]
+        23 D0                           and     edx,eax
+        41                              inc     ecx
+        3B CF                           cmp     ecx,edi
+        89 16                           mov     dword ptr [esi],edx
+        89 4C 24 10                     mov     dword ptr [esp+10h],ecx
+        7C BC                           jl      40140C
+401450: 33 F6                           xor     esi,esi
+        33 D2                           xor     edx,edx
+        85 FF                           test    edi,edi
+        7E 1F                           jle     401477
+401458: 8B 84 94 98 00 00 00            mov     eax,dword ptr [esp+edx*4+98h]
+        8B 5C 94 18                     mov     ebx,dword ptr [esp+edx*4+18h]
+        8D 4C 94 18                     lea     ecx,dword ptr [esp+edx*4+18h]
+        3B C3                           cmp     eax,ebx
+        74 07                           je      401472
+        BE 01 00 00 00                  mov     esi,1
+        89 01                           mov     dword ptr [ecx],eax
+401472: 42                              inc     edx
+        3B D7                           cmp     edx,edi
+        7C E1                           jl      401458
+401477: 85 F6                           test    esi,esi
+        75 84                           jne     4013FF
+        33 C0                           xor     eax,eax
+        85 FF                           test    edi,edi
+        89 44 24 10                     mov     dword ptr [esp+10h],eax
+        7E 35                           jle     4014BA
+401485: 8B 8C 84 98 00 00 00            mov     ecx,dword ptr [esp+eax*4+98h]
+        8B 54 85 00                     mov     edx,dword ptr [ebp+eax*4]
+        3B CA                           cmp     ecx,edx
+        75 19                           jne     4014AD
+        40                              inc     eax
+        3B C7                           cmp     eax,edi
+        89 44 24 10                     mov     dword ptr [esp+10h],eax
+        7C E8                           jl      401485
+        B8 01 00 00 00                  mov     eax,1
+        5F                              pop     edi
+        5E                              pop     esi
+        5D                              pop     ebp
+        5B                              pop     ebx
+        81 C4 08 01 00 00               add     esp,108h
+        C3                              ret
+4014AD: 33 C0                           xor     eax,eax     // 0
+        5F                              pop     edi
+        5E                              pop     esi
+        5D                              pop     ebp
+        5B                              pop     ebx
+        81 C4 08 01 00 00               add     esp,108h
+        C3                              ret
+4014BA: 5F                              pop     edi         // code duplication
+        5E                              pop     esi
+        5D                              pop     ebp
+        B8 01 00 00 00                  mov     eax,1       // 1
+        5B                              pop     ebx
+        81 C4 08 01 00 00               add     esp,108h
+        C3                              ret
+4014D0: 53                              push    ebx
+        56                              push    esi
+        57                              push    edi
+        8B 7C 24 14                     mov     edi,dword ptr [esp+14h]
+        85 FF                           test    edi,edi
+        74 44                           je      40151F
+        8B 5C 24 18                     mov     ebx,dword ptr [esp+18h]
+        85 DB                           test    ebx,ebx
+        74 3C                           je      40151F
+        8B 74 24 10                     mov     esi,dword ptr [esp+10h]
+        83 3E 00                        cmp     dword ptr [esi],0
+        74 33                           je      40151F
+        6A 00                           push    0
+        57                              push    edi
+        56                              push    esi
+        E8 BB 03 00 00                  call    4018B0
+        83 C4 0C                        add     esp,0Ch
+        85 C0                           test    eax,eax
+        74 23                           je      40151F
+        53                              push    ebx
+        57                              push    edi
+        56                              push    esi
+        E8 7C FE FF FF                  call    401380
+        83 C4 0C                        add     esp,0Ch
+        85 C0                           test    eax,eax
+        74 14                           je      40151F
+        8B 44 24 1C                     mov     eax,dword ptr [esp+1Ch]     // reference 1st order
+        8B 50 04                        mov     edx,dword ptr [eax+4]       // reference 2nd order
+        8B 08                           mov     ecx,dword ptr [eax]
+        8B 02                           mov     eax,dword ptr [edx]         // reference 3rd order
+        50                              push    eax
+        53                              push    ebx
+        57                              push    edi
+        56                              push    esi
+        FF 11                           call    dword ptr [ecx]
+        83 C4 10                        add     esp,10h
+40151F: 5F                              pop     edi         // multiple used return label
+        5E                              pop     esi
+        5B                              pop     ebx
+        C3                              ret
+401530: 8B 4C 24 08                     mov     ecx,dword ptr [esp+8]
+        83 EC 08                        sub     esp,8
+        85 C9                           test    ecx,ecx
+        74 06                           je      401541
+        C7 01 00 00 00 00               mov     dword ptr [ecx],0
+401541: 8B 44 24 14                     mov     eax,dword ptr [esp+14h]
+        85 C0                           test    eax,eax
+        74 06                           je      40154F
+        C7 00 00 00 00 00               mov     dword ptr [eax],0
+40154F: 85 C9                           test    ecx,ecx     // logical [boolean] or test
+        75 04                           jne     401557      // | with [c] sequence point
+        85 C0                           test    eax,eax     // |
+        74 1F                           je      401576      // |
+401557: 89 44 24 04                     mov     dword ptr [esp+4],eax
+        8D 44 24 00                     lea     eax,dword ptr [esp]
+        89 4C 24 00                     mov     dword ptr [esp],ecx
+        8B 4C 24 0C                     mov     ecx,dword ptr [esp+0Ch]
+        50                              push    eax
+        68 80 15 40 00                  push    401580h     // function pointer
+        51                              push    ecx
+        E8 ED FA FF FF                  call    401060
+        83 C4 0C                        add     esp,0Ch
+401576: 83 C4 08                        add     esp,8
+        C3                              ret
+401580: 8B 4C 24 10                     mov     ecx,dword ptr [esp+10h]
+        56                              push    esi
+        8B 01                           mov     eax,dword ptr [ecx]
+        8B 71 04                        mov     esi,dword ptr [ecx+4]
+        85 C0                           test    eax,eax
+        74 02                           je      401590
+        FF 00                           inc     dword ptr [eax]
+401590: 85 F6                           test    esi,esi
+        74 1D                           je      4015B1
+        8B 44 24 10                     mov     eax,dword ptr [esp+10h]
+        8B 4C 24 0C                     mov     ecx,dword ptr [esp+0Ch]
+        8B 54 24 08                     mov     edx,dword ptr [esp+8]
+        50                              push    eax
+        51                              push    ecx
+        52                              push    edx
+        E8 18 00 00 00                  call    4015C0      // predicate call, with conditional block
+        83 C4 0C                        add     esp,0Ch     // |
+        85 C0                           test    eax,eax     // |
+        74 02                           je      4015B1      // |
+        FF 06                           inc     dword ptr [esi]
+4015B1: 5E                              pop     esi
+        C3                              ret
+4015C0: 83 EC 0C                        sub     esp,0Ch     // [16 bytes aligned]
+        8D 44 24 18                     lea     eax,dword ptr [esp+18h]
+        8D 4C 24 14                     lea     ecx,dword ptr [esp+14h]
+        53                              push    ebx         // save non-volatile registers
+        55                              push    ebp         // |
+        56                              push    esi         // |
+        57                              push    edi         // |
+        8B 7C 24 20                     mov     edi,dword ptr [esp+20h]
+        50                              push    eax
+        51                              push    ecx
+        57                              push    edi
+        E8 25 04 00 00                  call    401A00
+        8B 6C 24 34                     mov     ebp,dword ptr [esp+34h]
+        8B 44 24 30                     mov     eax,dword ptr [esp+30h]
+        83 C4 0C                        add     esp,0Ch
+        3B C5                           cmp     eax,ebp
+        7E 0A                           jle     4015F4
+        33 C0                           xor     eax,eax
+        5F                              pop     edi
+        5E                              pop     esi
+        5D                              pop     ebp
+        5B                              pop     ebx
+        83 C4 0C                        add     esp,0Ch
+        C3                              ret
+4015F4: 33 DB                           xor     ebx,ebx
+        C7 44 24 10 FF FF FF FF         mov     dword ptr [esp+10h],0FFFFFFFFh
+        85 C0                           test    eax,eax
+        0F 8E 8E 02 00 00               jle     401894
+401606: 33 F6                           xor     esi,esi
+        85 ED                           test    ebp,ebp
+        0F 8E 61 02 00 00               jle     401871
+        8B 54 24 20                     mov     edx,dword ptr [esp+20h]
+        89 54 24 14                     mov     dword ptr [esp+14h],edx
+401618: F6 44 24 10 01                  test    byte ptr [esp+10h],1
+        74 3F                           je      40165E
+        BA 01 00 00 00                  mov     edx,1
+        8B CE                           mov     ecx,esi
+        D3 E2                           shl     edx,cl      // nth bit
+        8B 4C 24 20                     mov     ecx,dword ptr [esp+20h]
+        2B C3                           sub     eax,ebx
+        8B 4C 81 FC                     mov     ecx,dword ptr [ecx+eax*4-4]
+        8B 07                           mov     eax,dword ptr [edi]
+        23 CA                           and     ecx,edx     // nth bit
+        F7 D9                           neg     ecx         // carryflag = !zeroflag
+        1B C9                           sbb     ecx,ecx     // 0 or -1
+        23 C2                           and     eax,edx
+        F7 D9                           neg     ecx         // 1 or 2
+        F7 D8                           neg     eax
+        1B C0                           sbb     eax,eax
+        F7 D8                           neg     eax
+        2B C1                           sub     eax,ecx     // -1 or 0 or 1 [sign(diff)]
+        83 F8 FF                        cmp     eax,0FFh
+        0F 84 3B 02 00 00               je      40188A      // [quite long jump]
+        83 F8 01                        cmp     eax,1
+        75 0A                           jne     40165E
+        8B 44 24 10                     mov     eax,dword ptr [esp+10h]
+        24 FE                           and     al,0FEh
+        89 44 24 10                     mov     dword ptr [esp+10h],eax
+40165E: F6 44 24 10 02                  test    byte ptr [esp+10h],2
+        74 43                           je      4016A8
+        8B CD                           mov     ecx,ebp
+        8B 07                           mov     eax,dword ptr [edi]
+        2B CE                           sub     ecx,esi
+        BA 01 00 00 00                  mov     edx,1       // some code repetitions ...
+        49                              dec     ecx
+        D3 E2                           shl     edx,cl
+        8B CE                           mov     ecx,esi
+        23 D0                           and     edx,eax
+        B8 01 00 00 00                  mov     eax,1
+        F7 DA                           neg     edx
+        1B D2                           sbb     edx,edx
+        D3 E0                           shl     eax,cl
+        8B 0F                           mov     ecx,dword ptr [edi]
+        F7 DA                           neg     edx
+        23 C1                           and     eax,ecx
+        F7 D8                           neg     eax
+        1B C0                           sbb     eax,eax
+        F7 D8                           neg     eax
+        2B C2                           sub     eax,edx
+        83 F8 FF                        cmp     eax,0FFh
+        0F 84 F1 01 00 00               je      40188A
+        83 F8 01                        cmp     eax,1
+        75 0A                           jne     4016A8
+        8B 44 24 10                     mov     eax,dword ptr [esp+10h]
+        24 FD                           and     al,0FDh
+        89 44 24 10                     mov     dword ptr [esp+10h],eax
+4016A8: F6 44 24 10 04                  test    byte ptr [esp+10h],4
+        74 4D                           je      4016FC
+        8B 44 24 24                     mov     eax,dword ptr [esp+24h]
+        8B CD                           mov     ecx,ebp
+        2B CE                           sub     ecx,esi
+        BA 01 00 00 00                  mov     edx,1
+        49                              dec     ecx
+        2B C3                           sub     eax,ebx
+        D3 E2                           shl     edx,cl
+        8B 4C 24 20                     mov     ecx,dword ptr [esp+20h]
+        23 54 81 FC                     and     edx,dword ptr [ecx+eax*4-4]
+        B8 01 00 00 00                  mov     eax,1
+        8B CE                           mov     ecx,esi
+        F7 DA                           neg     edx
+        1B D2                           sbb     edx,edx
+        D3 E0                           shl     eax,cl
+        8B 0F                           mov     ecx,dword ptr [edi]
+        F7 DA                           neg     edx
+        23 C1                           and     eax,ecx
+        F7 D8                           neg     eax
+        1B C0                           sbb     eax,eax
+        F7 D8                           neg     eax
+        2B C2                           sub     eax,edx
+        83 F8 FF                        cmp     eax,0FFh
+        0F 84 9D 01 00 00               je      40188A
+        83 F8 01                        cmp     eax,1
+        75 0A                           jne     4016FC
+        8B 44 24 10                     mov     eax,dword ptr [esp+10h]
+        24 FB                           and     al,0FBh
+        89 44 24 10                     mov     dword ptr [esp+10h],eax
+4016FC: 39 6C 24 24                     cmp     dword ptr [esp+24h],ebp
+        0F 85 53 01 00 00               jne     401859
+        F6 44 24 10 08                  test    byte ptr [esp+10h],8
+        74 44                           je      401751
+        8B 44 24 14                     mov     eax,dword ptr [esp+14h]
+        BA 01 00 00 00                  mov     edx,1
+        8B CB                           mov     ecx,ebx
+        D3 E2                           shl     edx,cl
+        8B 08                           mov     ecx,dword ptr [eax]
+        B8 01 00 00 00                  mov     eax,1
+        23 D1                           and     edx,ecx
+        8B CE                           mov     ecx,esi
+        F7 DA                           neg     edx
+        1B D2                           sbb     edx,edx
+        D3 E0                           shl     eax,cl
+        8B 0F                           mov     ecx,dword ptr [edi]
+        F7 DA                           neg     edx
+        23 C1                           and     eax,ecx
+        F7 D8                           neg     eax
+        1B C0                           sbb     eax,eax
+        F7 D8                           neg     eax
+        2B C2                           sub     eax,edx
+        83 F8 FF                        cmp     eax,0FFh
+        0F 84 48 01 00 00               je      40188A
+        83 F8 01                        cmp     eax,1
+        75 0A                           jne     401751
+        8B 44 24 10                     mov     eax,dword ptr [esp+10h]
+        24 F7                           and     al,0F7h
+        89 44 24 10                     mov     dword ptr [esp+10h],eax
+401751: F6 44 24 10 10                  test    byte ptr [esp+10h],10h
+        74 49                           je      4017A1
+        8B 4C 24 24                     mov     ecx,dword ptr [esp+24h]
+        8B 44 24 14                     mov     eax,dword ptr [esp+14h]
+        2B CB                           sub     ecx,ebx
+        BA 01 00 00 00                  mov     edx,1
+        49                              dec     ecx
+        D3 E2                           shl     edx,cl
+        8B 08                           mov     ecx,dword ptr [eax]
+        B8 01 00 00 00                  mov     eax,1
+        23 D1                           and     edx,ecx
+        8B CE                           mov     ecx,esi
+        F7 DA                           neg     edx
+        1B D2                           sbb     edx,edx
+        D3 E0                           shl     eax,cl
+        8B 0F                           mov     ecx,dword ptr [edi]
+        F7 DA                           neg     edx
+        23 C1                           and     eax,ecx
+        F7 D8                           neg     eax
+        1B C0                           sbb     eax,eax
+        F7 D8                           neg     eax
+        2B C2                           sub     eax,edx
+        83 F8 FF                        cmp     eax,0FFh
+        0F 84 F8 00 00 00               je      40188A
+        83 F8 01                        cmp     eax,1
+        75 0A                           jne     4017A1
+        8B 44 24 10                     mov     eax,dword ptr [esp+10h]
+        24 EF                           and     al,0EFh
+        89 44 24 10                     mov     dword ptr [esp+10h],eax
+4017A1: F6 44 24 10 20                  test    byte ptr [esp+10h],20h
+        74 4A                           je      4017F2
+        B8 01 00 00 00                  mov     eax,1
+        8B CB                           mov     ecx,ebx
+        8B D5                           mov     edx,ebp
+        D3 E0                           shl     eax,cl
+        8B 4C 24 20                     mov     ecx,dword ptr [esp+20h]
+        2B D6                           sub     edx,esi
+        8B 54 91 FC                     mov     edx,dword ptr [ecx+edx*4-4]
+        8B CE                           mov     ecx,esi
+        23 D0                           and     edx,eax
+        B8 01 00 00 00                  mov     eax,1
+        F7 DA                           neg     edx
+        1B D2                           sbb     edx,edx
+        D3 E0                           shl     eax,cl
+        8B 0F                           mov     ecx,dword ptr [edi]
+        F7 DA                           neg     edx
+        23 C1                           and     eax,ecx
+        F7 D8                           neg     eax
+        1B C0                           sbb     eax,eax
+        F7 D8                           neg     eax
+        2B C2                           sub     eax,edx
+        83 F8 FF                        cmp     eax,0FFh
+        0F 84 A7 00 00 00               je      40188A
+        83 F8 01                        cmp     eax,1
+        75 0A                           jne     4017F2
+        8B 44 24 10                     mov     eax,dword ptr [esp+10h]
+        24 DF                           and     al,0DFh
+        89 44 24 10                     mov     dword ptr [esp+10h],eax
+4017F2: 8B 54 24 10                     mov     edx,dword ptr [esp+10h]
+        F6 C2 40                        test    dl,40h
+        74 4C                           je      401847
+        8B 4C 24 24                     mov     ecx,dword ptr [esp+24h]
+        B8 01 00 00 00                  mov     eax,1
+        2B CB                           sub     ecx,ebx
+        2B EE                           sub     ebp,esi
+        49                              dec     ecx
+        D3 E0                           shl     eax,cl
+        8B 4C 24 20                     mov     ecx,dword ptr [esp+20h]
+        23 44 A9 FC                     and     eax,dword ptr [ecx+ebp*4-4]
+        8B CE                           mov     ecx,esi
+        F7 D8                           neg     eax
+        1B C0                           sbb     eax,eax
+        F7 D8                           neg     eax
+        89 44 24 18                     mov     dword ptr [esp+18h],eax
+        B8 01 00 00 00                  mov     eax,1
+        D3 E0                           shl     eax,cl
+        8B 0F                           mov     ecx,dword ptr [edi]
+        23 C1                           and     eax,ecx
+        8B 4C 24 18                     mov     ecx,dword ptr [esp+18h]
+        F7 D8                           neg     eax
+        1B C0                           sbb     eax,eax
+        F7 D8                           neg     eax
+        2B C1                           sub     eax,ecx
+        83 F8 FF                        cmp     eax,0FFh
+        74 4F                           je      40188A
+        83 F8 01                        cmp     eax,1
+        75 07                           jne     401847
+        83 E2 BF                        and     edx,0BFh
+        89 54 24 10                     mov     dword ptr [esp+10h],edx
+401847: 52                              push    edx
+        E8 C3 00 00 00                  call    401910
+        83 C4 04                        add     esp,4
+        83 F8 07                        cmp     eax,7
+        74 3F                           je      401894
+        8B 6C 24 28                     mov     ebp,dword ptr [esp+28h]
+401859: 8B 4C 24 14                     mov     ecx,dword ptr [esp+14h]
+        8B 44 24 24                     mov     eax,dword ptr [esp+24h]
+        46                              inc     esi
+        83 C1 04                        add     ecx,4
+        3B F5                           cmp     esi,ebp
+        89 4C 24 14                     mov     dword ptr [esp+14h],ecx
+        0F 8C A7 FD FF FF               jl      401618
+401871: 43                              inc     ebx
+        83 C7 04                        add     edi,4
+        3B D8                           cmp     ebx,eax
+        0F 8C 89 FD FF FF               jl      401606
+        B8 01 00 00 00                  mov     eax,1
+        5F                              pop     edi
+        5E                              pop     esi
+        5D                              pop     ebp
+        5B                              pop     ebx
+        83 C4 0C                        add     esp,0Ch
+        C3                              ret
+40188A: 33 C0                           xor     eax,eax
+        5F                              pop     edi
+        5E                              pop     esi
+        5D                              pop     ebp
+        5B                              pop     ebx
+        83 C4 0C                        add     esp,0Ch
+        C3                              ret
+401894: 5F                              pop     edi
+        5E                              pop     esi
+        5D                              pop     ebp
+        B8 01 00 00 00                  mov     eax,1
+        5B                              pop     ebx
+        83 C4 0C                        add     esp,0Ch
+        C3                              ret
+4018B0: 8B 54 24 08                     mov     edx,dword ptr [esp+8]
+        33 C0                           xor     eax,eax
+        56                              push    esi
+        85 D2                           test    edx,edx
+        7E 26                           jle     4018E1
+        8B 4C 24 10                     mov     ecx,dword ptr [esp+10h]
+        BE 01 00 00 00                  mov     esi,1
+        D3 E6                           shl     esi,cl
+        8B 4C 24 08                     mov     ecx,dword ptr [esp+8]
+4018CA: 85 31                           test    dword ptr [ecx],esi
+        75 0C                           jne     4018DA
+        40                              inc     eax
+        83 C1 04                        add     ecx,4
+        3B C2                           cmp     eax,edx
+        7C F4                           jl      4018CA
+        33 C0                           xor     eax,eax
+        5E                              pop     esi
+        C3                              ret
+4018DA: B8 01 00 00 00                  mov     eax,1
+        5E                              pop     esi
+        C3                              ret
+4018E1: 33 C0                           xor     eax,eax     // [questionable code duplication]
+        5E                              pop     esi
+        C3                              ret
+4018F0: 8B 4C 24 08                     mov     ecx,dword ptr [esp+8]
+        85 C9                           test    ecx,ecx     // check for zero count [special case]
+        7E 0A                           jle     401902
+        57                              push    edi
+        8B 7C 24 08                     mov     edi,dword ptr [esp+8]
+        33 C0                           xor     eax,eax               // zero-out memory
+        F3 AB                       rep stos    dword ptr es:[edi]    // |
+        5F                              pop     edi
+401902: C3                              ret
+401910: 8B 44 24 04                     mov     eax,dword ptr [esp+4]
+        50                              push    eax
+        E8 06 00 00 00                  call    401920
+        83 C4 04                        add     esp,4
+        C3                              ret
+401920: 8B 44 24 04                     mov     eax,dword ptr [esp+4]   // first argument
+        85 C0                           test    eax,eax     // [special case]
+        75 04                           jne     40192C
+        83 C8 FF                        or      eax,0FFh    // shorter bytecode for mov eax,-1
+        C3                              ret
+40192C: 8B D0                           mov     edx,eax
+        33 C9                           xor     ecx,ecx
+        81 E2 FF FF 00 00               and     edx,0FFFFh  // check bit mask
+        74 07                           je      40193F      // |
+        B9 01 00 00 00                  mov     ecx,1
+        8B C2                           mov     eax,edx
+40193F: 8B D0                           mov     edx,eax
+        D1 E1                           shl     ecx,1       // propagate bit
+        81 E2 FF 00 FF 00               and     edx,0FF00FFh
+        74 05                           je      401950
+        83 C9 01                        or      ecx,1       // set next bit
+        8B C2                           mov     eax,edx
+401950: 8B D0                           mov     edx,eax
+        D1 E1                           shl     ecx,1       // propagate bit
+        81 E2 0F 0F 0F 0F               and     edx,0F0F0F0Fh
+        74 05                           je      401961
+        83 C9 01                        or      ecx,1
+        8B C2                           mov     eax,edx
+401961: 8B D0                           mov     edx,eax
+        D1 E1                           shl     ecx,1
+        81 E2 33 33 33 33               and     edx,33333333h
+        74 05                           je      401972
+        83 C9 01                        or      ecx,1
+        8B C2                           mov     eax,edx
+401972: D1 E1                           shl     ecx,1
+        A9 55 55 55 55                  test    eax,55555555h
+        74 03                           je      40197E
+        83 C9 01                        or      ecx,1
+40197E: B8 1F 00 00 00                  mov     eax,1Fh
+        2B C1                           sub     eax,ecx
+        C3                              ret
+401990: 53                              push    ebx
+        55                              push    ebp
+        8B 6C 24 14                     mov     ebp,dword ptr [esp+14h]
+        56                              push    esi
+        85 ED                           test    ebp,ebp     // check for null pointer
+        57                              push    edi
+        74 07                           je      4019A3
+        C7 45 00 FF FF FF FF            mov     dword ptr [ebp],0FFFFFFFFh  // -1
+4019A3: 8B 44 24 20                     mov     eax,dword ptr [esp+20h]
+        85 C0                           test    eax,eax
+        74 06                           je      4019B1
+        C7 00 FF FF FF FF               mov     dword ptr [eax],0FFFFFFFFh
+4019B1: 8B 5C 24 18                     mov     ebx,dword ptr [esp+18h]
+        33 F6                           xor     esi,esi
+        85 DB                           test    ebx,ebx
+        7E 32                           jle     4019ED
+        8B 7C 24 14                     mov     edi,dword ptr [esp+14h]
+4019BF: 8B 07                           mov     eax,dword ptr [edi]
+        50                              push    eax
+        E8 49 FF FF FF                  call    401910
+        83 C4 04                        add     esp,4
+        83 F8 FF                        cmp     eax,0FFh
+        75 0D                           jne     4019DC
+        46                              inc     esi
+        83 C7 04                        add     edi,4
+        3B F3                           cmp     esi,ebx
+        7C E8                           jl      4019BF
+        5F                              pop     edi
+        5E                              pop     esi
+        5D                              pop     ebp
+        5B                              pop     ebx
+        C3                              ret
+4019DC: 85 ED                           test    ebp,ebp
+        74 03                           je      4019E3
+        89 75 00                        mov     dword ptr [ebp],esi
+4019E3: 8B 4C 24 20                     mov     ecx,dword ptr [esp+20h]
+        85 C9                           test    ecx,ecx
+        74 02                           je      4019ED
+        89 01                           mov     dword ptr [ecx],eax
+4019ED: 5F                              pop     edi
+        5E                              pop     esi
+        5D                              pop     ebp
+        5B                              pop     ebx
+        C3                              ret
+401A00: 56                              push    esi
+        8B 74 24 0C                     mov     esi,dword ptr [esp+0Ch]
+        57                              push    edi
+        8B 7C 24 14                     mov     edi,dword ptr [esp+14h]
+        83 3E 00                        cmp     dword ptr [esi],0
+        7E 44                           jle     401A53
+        83 3F 00                        cmp     dword ptr [edi],0
+        7E 3F                           jle     401A53
+        8B 4C 24 0C                     mov     ecx,dword ptr [esp+0Ch]
+401A18: 8B 06                           mov     eax,dword ptr [esi]
+        8B 54 81 FC                     mov     edx,dword ptr [ecx+eax*4-4]
+        85 D2                           test    edx,edx
+        75 07                           jne     401A29
+        48                              dec     eax
+        85 C0                           test    eax,eax
+        89 06                           mov     dword ptr [esi],eax
+        7F EF                           jg      401A18
+401A29: 8B 06                           mov     eax,dword ptr [esi]
+        85 C0                           test    eax,eax
+        75 05                           jne     401A34
+        89 07                           mov     dword ptr [edi],eax
+        5F                              pop     edi
+        5E                              pop     esi
+        C3                              ret
+401A34: 50                              push    eax
+        51                              push    ecx
+        E8 A5 00 00 00                  call    401AE0
+        83 C4 08                        add     esp,8
+        50                              push    eax
+        E8 2C 00 00 00                  call    401A70
+        83 C4 04                        add     esp,4
+        40                              inc     eax
+        85 C0                           test    eax,eax
+        89 07                           mov     dword ptr [edi],eax
+        75 11                           jne     401A5F
+        89 06                           mov     dword ptr [esi],eax
+        5F                              pop     edi
+        5E                              pop     esi
+        C3                              ret
+401A53: C7 07 00 00 00 00               mov     dword ptr [edi],0
+        C7 06 00 00 00 00               mov     dword ptr [esi],0
+401A5F: 5F                              pop     edi
+        5E                              pop     esi
+        C3                              ret
+401A70: 8B 44 24 04                     mov     eax,dword ptr [esp+4]
+        50                              push    eax
+        E8 06 00 00 00                  call    401A80
+        83 C4 04                        add     esp,4
+        C3                              ret
+401A80: 8B 4C 24 04                     mov     ecx,dword ptr [esp+4]
+        85 C9                           test    ecx,ecx
+        75 04                           jne     401A8C
+        83 C8 FF                        or      eax,0FFh
+        C3                              ret
+401A8C: 8B D1                           mov     edx,ecx
+        33 C0                           xor     eax,eax
+        81 E2 00 00 FF FF               and     edx,0FFFF0000h  // bit mask
+        74 07                           je      401A9F
+        B8 01 00 00 00                  mov     eax,1
+        8B CA                           mov     ecx,edx
+401A9F: 8B D1                           mov     edx,ecx
+        D1 E0                           shl     eax,1
+        81 E2 00 FF 00 FF               and     edx,0FF00FF00h
+        74 04                           je      401AAF
+        0C 01                           or      al,1        // bit set
+        8B CA                           mov     ecx,edx
+401AAF: 8B D1                           mov     edx,ecx
+        D1 E0                           shl     eax,1       // bit propagation
+        81 E2 F0 F0 F0 F0               and     edx,0F0F0F0F0h
+        74 04                           je      401ABF
+        0C 01                           or      al,1
+        8B CA                           mov     ecx,edx
+401ABF: 8B D1                           mov     edx,ecx
+        D1 E0                           shl     eax,1
+        81 E2 CC CC CC CC               and     edx,0CCCCCCCCh
+        74 04                           je      401ACF
+        0C 01                           or      al,1
+        8B CA                           mov     ecx,edx
+401ACF: D1 E0                           shl     eax,1
+        F7 C1 AA AA AA AA               test    ecx,0AAAAAAAAh
+        74 02                           je      401ADB
+        0C 01                           or      al,1
+401ADB: C3                              ret
+401AE0: 8B 54 24 08                     mov     edx,dword ptr [esp+8]
+        33 C0                           xor     eax,eax
+        85 D2                           test    edx,edx     // zero loop check
+        7E 10                           jle     401AFA      // |
+        8B 4C 24 04                     mov     ecx,dword ptr [esp+4]
+        56                              push    esi         // [delayed register save]
+401AEF: 8B 31                           mov     esi,dword ptr [ecx]
+        83 C1 04                        add     ecx,4
+        0B C6                           or      eax,esi     // arithmetic-or on vector
+        4A                              dec     edx
+        75 F6                           jne     401AEF
+        5E                              pop     esi
+401AFA: C3                              ret
+entry_point:    // [as found in program executable header]
+401B00: 55                              push    ebp         // establish a new stack frame
+        8B EC                           mov     ebp,esp     // | [startup code compiled differently]
+        6A FF                           push    0FFh
+        68 30 20 40 00                  push    402030h
+        68 A0 1C 40 00                  push    401CA0h     // _except_handler3
+        64 A1 00 00 00 00               mov     eax,fs:[0]
+        50                              push    eax
+        64 89 25 00 00 00 00            mov     dword ptr fs:[0h],esp
+        83 C4 E0                        add     esp,0E0h    // sub esp,32
+        53                              push    ebx         // [non-volatiles]
+        56                              push    esi         // |
+        57                              push    edi         // |
+        89 65 E8                        mov     dword ptr [ebp-18h],esp     // ebp-relative reference
+        C7 45 FC 00 00 00 00            mov     dword ptr [ebp-4],0     // esp+38h
+        6A 01                           push    1
+        FF 15 90 40 40 00               call    dword ptr ds:[404090h]  // __set_app_type
+        83 C4 04                        add     esp,4
+        C7 05 30 30 40 00 FF FF FF FF   mov     dword ptr ds:[403030h],0FFFFFFFFh
+        C7 05 34 30 40 00 FF FF FF FF   mov     dword ptr ds:[403034h],0FFFFFFFFh
+        FF 15 8C 40 40 00               call    dword ptr ds:[40408Ch]  // __p__fmode
+        8B 0D 2C 30 40 00               mov     ecx,dword ptr ds:[40302Ch]
+        89 08                           mov     dword ptr [eax],ecx
+        FF 15 88 40 40 00               call    dword ptr ds:[404088h]  // __p__commode
+        8B 15 28 30 40 00               mov     edx,dword ptr ds:[403028h]
+        89 10                           mov     dword ptr [eax],edx
+        A1 64 40 40 00                  mov     eax,[404064]    // _adjust_fdiv
+        8B 08                           mov     ecx,dword ptr [eax]
+        89 0D 38 30 40 00               mov     dword ptr ds:[403038h],ecx
+        E8 16 01 00 00                  call    401C90
+        A1 10 30 40 00                  mov     eax,[403010]
+        85 C0                           test    eax,eax
+        75 0E                           jne     401B91
+        68 80 1C 40 00                  push    401C80h
+        FF 15 80 40 40 00               call    dword ptr ds:[404080h]  // __setusermatherr
+        83 C4 04                        add     esp,4
+401B91: E8 CA 00 00 00                  call    401C60
+        68 0C 30 40 00                  push    40300Ch
+        68 08 30 40 00                  push    403008h
+        E8 B1 00 00 00                  call    401C56      // _initterm
+        83 C4 08                        add     esp,8
+        8B 15 24 30 40 00               mov     edx,dword ptr ds:[403024h]
+        89 55 D8                        mov     dword ptr [ebp-28h],edx
+        8D 45 D8                        lea     eax,dword ptr [ebp-28h]
+        50                              push    eax
+        8B 0D 20 30 40 00               mov     ecx,dword ptr ds:[403020h]
+        51                              push    ecx
+        8D 55 E0                        lea     edx,dword ptr [ebp-20h]     // &envp
+        52                              push    edx
+        8D 45 D4                        lea     eax,dword ptr [ebp-2Ch]     // &argv
+        50                              push    eax
+        8D 4D E4                        lea     ecx,dword ptr [ebp-1Ch]     // &argc
+        51                              push    ecx
+        FF 15 78 40 40 00               call    dword ptr ds:[404078h]  // __getmainargs
+        83 C4 14                        add     esp,14h
+        68 04 30 40 00                  push    403004h
+        68 00 30 40 00                  push    403000h
+        E8 76 00 00 00                  call    401C56      // _initterm
+        83 C4 08                        add     esp,8
+        FF 15 74 40 40 00               call    dword ptr ds:[404074h]  // __p___initenv
+        8B 55 E0                        mov     edx,dword ptr [ebp-20h]
+        89 10                           mov     dword ptr [eax],edx
+        8B 45 E0                        mov     eax,dword ptr [ebp-20h]     // envp
+        50                              push    eax
+        8B 4D D4                        mov     ecx,dword ptr [ebp-2Ch]     // argv
+        51                              push    ecx
+        8B 55 E4                        mov     edx,dword ptr [ebp-1Ch]     // argc
+        52                              push    edx
+        E8 01 F4 FF FF                  call    401000      // main
+        83 C4 0C                        add     esp,0Ch
+        89 45 DC                        mov     dword ptr [ebp-24h],eax
+        50                              push    eax
+        FF 15 70 40 40 00               call    dword ptr ds:[404070h]  // exit
+        EB 22                           jmp     401C30
+401C0E: 8B 45 EC                        mov     eax,dword ptr [ebp-14h]
+        8B 08                           mov     ecx,dword ptr [eax]
+        8B 09                           mov     ecx,dword ptr [ecx]
+        89 4D D0                        mov     dword ptr [ebp-30h],ecx
+        50                              push    eax
+        51                              push    ecx
+        E8 31 00 00 00                  call    401C50      // _XcptFilter
+        83 C4 08                        add     esp,8
+        C3                              ret
+401C23: 8B 65 E8                        mov     esp,dword ptr [ebp-18h]
+        8B 55 D0                        mov     edx,dword ptr [ebp-30h]
+        52                              push    edx
+        FF 15 68 40 40 00               call    dword ptr ds:[404068h]  // _exit
+401C30: 83 C4 04                        add     esp,4
+        C7 45 FC FF FF FF FF            mov     dword ptr [ebp-4],0FFFFFFFFh
+        8B 4D F0                        mov     ecx,dword ptr [ebp-10h]
+        64 89 0D 00 00 00 00            mov     dword ptr fs:[0h],ecx
+        5F                              pop     edi
+        5E                              pop     esi
+        5B                              pop     ebx
+        8B E5                           mov     esp,ebp     // pop stack frame
+        5D                              pop     ebp         // |
+        C3                              ret
+401C50: FF 25 6C 40 40 00               jmp     dword ptr ds:[40406Ch]  // _XcptFilter ; forwarder
+401C56: FF 25 7C 40 40 00               jmp     dword ptr ds:[40407Ch]  // _initterm
+        CC                              int     3           // debugger trap [unreferenced]
+        CC                              int     3           // [unreferenced]
+        CC                              int     3           // [unreferenced]
+        CC                              int     3           // [unreferenced]
+401C60: 68 00 00 03 00                  push    30000h
+        68 00 00 01 00                  push    10000h
+        E8 37 00 00 00                  call    401CA6      // _controlfp
+        83 C4 08                        add     esp,8
+        C3                              ret
+401C80: 33 C0                           xor     eax,eax     // return zero
+        C3                              ret
+401C90: C3                              ret                 // empty procedure
+401CA0: FF 25 94 40 40 00               jmp     dword ptr ds:[404094h]  // _except_handler3
+401CA6: FF 25 98 40 40 00               jmp     dword ptr ds:[404098h]  // _controlfp
+
+section #2 .rdata
+initialized data read only [40000040]
+
+402000: 25 64 20 66 69 67 75 72 65 73 20 28 25 64 20 64     %d figures (%d d
+        69 73 74 69 6E 63 74 73 29 0A 00 00                 istincts)...
+40201C: 66 69 67 75 72 65 20 73 69 7A 65 20 25 64 3A 20     figure size %d: 
+        00 00 00 00                                         ....
+402030: FF FF FF FF 0E 1C 40 00 23 1C 40 00                 ......@.#.@.
+
+section #3 .data
+initialized data read write [C0000040]
+
+403000: 00 00 00 00                                         ....
+403004: 00 00 00 00                                         ....
+403008: 00 00 00 00                                         ....
+40300C: 00 00 00 00                                         ....
+403010: 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00     ................
+403020: 00 00 00 00                                         ....
+403024: 00 00 00 00                                         ....
+403028: 00 00 00 00                                         ....
+40302C: 00 00 00 00                                         ....
+403030: 00 00 00 00                                         ....
+403034: 00 00 00 00                                         ....
+403038: 00 00 00 00                                         ....
+
+section #4 .idata
+initialized data read write [C0000040]
+
+import_directory:   // [as found in program executable header]
+404000: 28 40 00 00 00 00 00 00 00 00 00 00 AA 40 00 00     (@...........@..
+        64 40 00 00 00 00 00 00 00 00 00 00 00 00 00 00     d@..............
+        00 00 00 00 00 00 00 00                             ........
+404028: 14 41 00 00 B6 40 00 00 BE 40 00 00 CC 40 00 00     .A...@...@...@..
+        D4 40 00 00 E4 40 00 00 F4 40 00 00 00 41 00 00     .@...@...@...A..
+        A0 40 00 00 24 41 00 00 34 41 00 00 42 41 00 00     .@..$A..4A..BA..
+        54 41 00 00 68 41 00 00 00 00 00 00                 TA..hA......
+import_address_table_directory:     // [as found in program executable header]
+404064: 14 41 00 00                                         .A..    // _adjust_fdiv
+404068: B6 40 00 00                                         .@..    // _exit
+40406C: BE 40 00 00                                         .@..    // _XcptFilter
+404070: CC 40 00 00                                         .@..    // exit
+404074: D4 40 00 00                                         .@..    // __p___initenv
+404078: E4 40 00 00                                         .@..    // __getmainargs
+40407C: F4 40 00 00                                         .@..    // _initterm
+404080: 00 41 00 00                                         .A..    // __setusermatherr
+404084: A0 40 00 00                                         .@..    // printf
+404088: 24 41 00 00                                         $A..    // __p__commode
+40408C: 34 41 00 00                                         4A..    // __p__fmode
+404090: 42 41 00 00                                         BA..    // __set_app_type
+404094: 54 41 00 00                                         TA..    // _except_handler3
+404098: 68 41 00 00 00 00 00 00                             hA......    // _controlfp
+4040A0: 99 02 70 72 69 6E 74 66 00 00                       ..printf..
+4040AA: 4D 53 56 43 52 54 2E 64 6C 6C 00 00                 MSVCRT.dll..
+4040B6: CF 00 5F 65 78 69 74 00                             .._exit.
+4040BE: 48 00 5F 58 63 70 74 46 69 6C 74 65 72 00           H._XcptFilter.
+4040CC: 44 02 65 78 69 74 00 00                             D.exit..
+4040D4: 63 00 5F 5F 70 5F 5F 5F 69 6E 69 74 65 6E 76 00     c.__p___initenv.
+4040E4: 58 00 5F 5F 67 65 74 6D 61 69 6E 61 72 67 73 00     X.__getmainargs.
+4040F4: 0B 01 5F 69 6E 69 74 74 65 72 6D 00                 .._initterm.
+404100: 81 00 5F 5F 73 65 74 75 73 65 72 6D 61 74 68 65     ..__setusermathe
+        72 72 00 00                                         rr..
+404114: 9A 00 5F 61 64 6A 75 73 74 5F 66 64 69 76 00 00     .._adjust_fdiv..
+404124: 69 00 5F 5F 70 5F 5F 63 6F 6D 6D 6F 64 65 00 00     i.__p__commode..
+404134: 6E 00 5F 5F 70 5F 5F 66 6D 6F 64 65 00 00           n.__p__fmode..
+404142: 7F 00 5F 5F 73 65 74 5F 61 70 70 5F 74 79 70 65     ..__set_app_type
+        00 00                                               ..
+404154: C6 00 5F 65 78 63 65 70 74 5F 68 61 6E 64 6C 65     .._except_handle
+        72 33 00 00                                         r3..
+404168: B3 00 5F 63 6F 6E 74 72 6F 6C 66 70 00 00           .._controlfp..
